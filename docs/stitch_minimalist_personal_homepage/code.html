@@ -1,392 +1,678 @@
-<!DOCTYPE html>
+<!doctype html>
 
-<html lang="zh-CN"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>imsyy - 个人主页与起始页</title>
-<!-- Tailwind CSS CDN with plugins -->
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<!-- FontAwesome for refined aesthetic icons -->
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet"/>
-<!-- Google Fonts: Pacifico/Caveat/Comfortaa for branding and clean typography -->
-<link href="https://fonts.googleapis.com" rel="preconnect"/>
-<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&amp;family=Comfortaa:wght@700&amp;family=Inter:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;family=Noto+Serif+SC:wght@400;500&amp;display=swap" rel="stylesheet"/>
-<script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', '"PingFang SC"', '"Hiragino Sans GB"', '"Microsoft YaHei"', 'sans-serif'],
-            mono: ['"JetBrains Mono"', 'monospace'],
-            hand: ['"Comfortaa"', 'Caveat', 'cursive'],
-            quote: ['"Noto Serif SC"', 'serif']
-          },
-          colors: {
-            paper: {
-              50: '#fafbf9',
-              100: '#f4f5f1',
-              200: '#e9eae3',
-              subtle: '#f7f8f5'
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>xbaimu - 个人主页与起始页</title>
+    <!-- Tailwind CSS CDN with plugins -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <!-- FontAwesome for refined aesthetic icons -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      rel="stylesheet"
+    />
+    <!-- Google Fonts: Pacifico/Caveat/Comfortaa for branding and clean typography -->
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&amp;family=Comfortaa:wght@700&amp;family=Inter:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;family=Noto+Serif+SC:wght@400;500&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: [
+                "Inter",
+                "-apple-system",
+                "BlinkMacSystemFont",
+                '"PingFang SC"',
+                '"Hiragino Sans GB"',
+                '"Microsoft YaHei"',
+                "sans-serif",
+              ],
+              mono: ['"JetBrains Mono"', "monospace"],
+              hand: ['"Comfortaa"', "Caveat", "cursive"],
+              quote: ['"Noto Serif SC"', "serif"],
             },
-            ink: {
-              900: '#22252a',
-              700: '#474c54',
-              500: '#717882',
-              300: '#9ea5b0',
-              100: '#e3e6ea'
+            colors: {
+              paper: {
+                50: "#fafbf9",
+                100: "#f4f5f1",
+                200: "#e9eae3",
+                subtle: "#f7f8f5",
+              },
+              ink: {
+                900: "#22252a",
+                700: "#474c54",
+                500: "#717882",
+                300: "#9ea5b0",
+                100: "#e3e6ea",
+              },
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      /* Paper crafted delicate borders & soft tactile shadows */
+      body {
+        background-color: #f7f8f5;
+        background-image:
+          radial-gradient(#e5e7df 0.8px, transparent 0.8px),
+          radial-gradient(#e5e7df 0.8px, #f7f8f5 0.8px);
+        background-size: 32px 32px;
+        background-position:
+          0 0,
+          16px 16px;
+      }
+
+      .paper-card {
+        background: #ffffff;
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        box-shadow:
+          0 2px 10px rgba(28, 39, 60, 0.03),
+          0 1px 3px rgba(28, 39, 60, 0.02);
+        transition: all 0.25s ease;
+      }
+
+      .paper-card-hover:hover {
+        transform: translateY(-2px);
+        box-shadow:
+          0 8px 20px -4px rgba(28, 39, 60, 0.06),
+          0 2px 6px rgba(28, 39, 60, 0.03);
+        border-color: rgba(0, 0, 0, 0.1);
+      }
+
+      /* Clean analog clock disc */
+      .clock-disk {
+        background: #2b323b;
+        box-shadow:
+          inset 0 2px 5px rgba(0, 0, 0, 0.35),
+          0 4px 12px rgba(43, 50, 59, 0.15);
+      }
+    </style>
+  </head>
+  <body
+    class="relative min-h-screen w-full select-none text-ink-900 overflow-x-hidden font-sans antialiased flex flex-col justify-between"
+  >
+    <!-- BEGIN: TopBarNav -->
+    <header
+      class="w-full px-6 md:px-14 pt-7 flex items-center justify-between text-xs tracking-wide text-ink-500 z-20"
+    >
+      <div class="flex items-center space-x-2.5">
+        <span class="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
+        <span
+          class="font-mono text-ink-700 font-medium text-[13px] tracking-tight"
+          >ONLINE</span
+        >
+        <span class="text-ink-300">/</span>
+        <span class="text-ink-500 font-normal">独立探索与随想起始页</span>
+      </div>
+      <!-- Right Utility Toggles -->
+      <div class="flex items-center space-x-2">
+        <button
+          class="w-8 h-8 rounded-lg paper-card flex items-center justify-center text-ink-500 hover:text-ink-900 transition hover:bg-paper-100"
+          id="fullscreen-btn"
+          title="全屏浏览"
+        >
+          <i class="fa-solid fa-expand text-xs"></i>
+        </button>
+        <button
+          class="w-8 h-8 rounded-lg paper-card flex items-center justify-center text-emerald-600 hover:text-emerald-700 transition hover:bg-paper-100"
+          id="theme-btn"
+          title="轻音乐氛围"
+        >
+          <i
+            class="fa-solid fa-compact-disc animate-spin text-xs"
+            style="animation-duration: 8s"
+          ></i>
+        </button>
+      </div>
+    </header>
+    <!-- END: TopBarNav -->
+    <!-- BEGIN: MainContent -->
+    <main
+      class="w-full max-w-6xl mx-auto px-6 md:px-10 py-10 my-auto z-10 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center"
+      data-purpose="layout-grid"
+    >
+      <!-- LEFT COLUMN: Identity & Bio (5 Cols) -->
+      <section
+        class="lg:col-span-5 flex flex-col justify-center space-y-6"
+        data-purpose="brand-identity-column"
+      >
+        <!-- Brand Logo / Realtime Analog Quartz Clock Avatar Hybrid -->
+        <div class="flex items-center space-x-5 group cursor-default">
+          <div
+            class="relative w-20 h-20 sm:w-24 sm:h-24 rounded-full p-1 bg-white border border-black/[0.08] shadow-sm flex-shrink-0"
+          >
+            <div
+              class="w-full h-full rounded-full clock-disk relative flex items-center justify-center overflow-hidden"
+            >
+              <!-- 12 / 3 / 6 / 9 Markers -->
+              <div
+                class="absolute w-[2px] h-2 bg-slate-400 top-1.5 rounded-full"
+              ></div>
+              <div
+                class="absolute w-[2px] h-2 bg-slate-400 bottom-1.5 rounded-full"
+              ></div>
+              <div
+                class="absolute h-[2px] w-2 bg-slate-400 left-1.5 rounded-full"
+              ></div>
+              <div
+                class="absolute h-[2px] w-2 bg-slate-400 right-1.5 rounded-full"
+              ></div>
+              <!-- Analog Hands -->
+              <div
+                class="absolute w-1 h-5 bg-white/90 rounded-full origin-bottom top-5 sm:top-7 transform -rotate-45"
+                id="analog-hour"
+              ></div>
+              <div
+                class="absolute w-0.5 h-7 bg-sky-300 rounded-full origin-bottom top-3 sm:top-5 transform rotate-45"
+                id="analog-min"
+              ></div>
+              <div
+                class="absolute w-[1px] h-8 bg-rose-400 rounded-full origin-bottom top-2.5 sm:top-4 transform rotate-90"
+                id="analog-sec"
+              ></div>
+              <div class="w-1.5 h-1.5 rounded-full bg-rose-400 z-10"></div>
+            </div>
+          </div>
+          <!-- Site Brand Name & Tagline -->
+          <div class="flex flex-col">
+            <div class="flex items-baseline space-x-1">
+              <h1
+                class="text-4xl sm:text-5xl font-hand tracking-tight text-ink-900 font-bold"
+              >
+                xbaimu
+              </h1>
+              <span class="text-xl font-mono text-ink-500 font-normal"
+                >.top</span
+              >
+            </div>
+            <p
+              class="text-xs sm:text-sm text-ink-500 tracking-wider mt-1.5 font-normal flex items-center gap-1.5"
+            >
+              <i class="fa-solid fa-feather text-[10px] text-emerald-600"></i>
+              静水流深 · 沧笙踏歌
+            </p>
+          </div>
+        </div>
+        <!-- Hello World Note Card -->
+        <article
+          class="paper-card rounded-xl p-5 sm:p-6 relative overflow-hidden"
+          data-purpose="manifesto-card"
+        >
+          <span
+            class="text-3xl text-ink-300/40 font-serif leading-none absolute top-3 left-4 select-none"
+            >“</span
+          >
+          <div class="relative z-10 pl-5 pr-2 pt-1">
+            <div class="flex items-center justify-between">
+              <h2
+                class="text-base sm:text-lg font-mono font-semibold text-ink-900 tracking-tight flex items-center gap-2"
+              >
+                <span>Hello World!</span>
+              </h2>
+              <span
+                class="text-[11px] font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200/60 font-medium"
+                >v3.4.0</span
+              >
+            </div>
+            <p class="mt-2.5 text-sm text-ink-700 font-normal leading-relaxed">
+              一个建立于 21 世纪的小站，存活于互联网的边缘。
+            </p>
+            <div
+              class="mt-3.5 pt-3 border-t border-black/[0.04] flex items-center justify-between text-xs text-ink-500"
+            >
+              <span class="text-[12px]">代码、日常记录与生活偶得</span>
+              <span class="text-[11px] text-ink-300">随遇而安</span>
+            </div>
+          </div>
+          <span
+            class="text-3xl text-ink-300/40 font-serif leading-none absolute bottom-2 right-4 select-none"
+            >”</span
+          >
+        </article>
+        <!-- Developer & Social Hub Icon Bar (Clean Monochrome) -->
+        <div
+          class="flex items-center space-x-3 pt-1"
+          data-purpose="social-icons"
+        >
+          <a
+            class="w-9 h-9 rounded-lg paper-card flex items-center justify-center text-ink-700 hover:text-ink-900 hover:bg-paper-100 transition-all"
+            href="https://github.com"
+            rel="noopener noreferrer"
+            target="_blank"
+            title="GitHub"
+          >
+            <i class="fa-brands fa-github text-base"></i>
+          </a>
+          <a
+            class="w-9 h-9 rounded-lg paper-card flex items-center justify-center text-ink-700 hover:text-[#00a1d6] hover:bg-paper-100 transition-all"
+            href="https://bilibili.com"
+            rel="noopener noreferrer"
+            target="_blank"
+            title="哔哩哔哩"
+          >
+            <i class="fa-brands fa-bilibili text-sm"></i>
+          </a>
+          <a
+            class="w-9 h-9 rounded-lg paper-card flex items-center justify-center text-ink-700 hover:text-[#171a21] hover:bg-paper-100 transition-all"
+            href="#"
+            title="Steam"
+          >
+            <i class="fa-brands fa-steam text-base"></i>
+          </a>
+          <a
+            class="w-9 h-9 rounded-lg paper-card flex items-center justify-center text-ink-700 hover:text-emerald-600 hover:bg-paper-100 transition-all"
+            href="mailto:contact@xbaimu.cn"
+            title="电子邮件"
+          >
+            <i class="fa-regular fa-envelope text-sm"></i>
+          </a>
+          <a
+            class="w-9 h-9 rounded-lg paper-card flex items-center justify-center text-ink-700 hover:text-ink-900 hover:bg-paper-100 transition-all"
+            href="https://twitter.com"
+            rel="noopener noreferrer"
+            target="_blank"
+            title="X / Twitter"
+          >
+            <i class="fa-brands fa-x-twitter text-sm"></i>
+          </a>
+          <a
+            class="w-9 h-9 rounded-lg paper-card flex items-center justify-center text-ink-700 hover:text-sky-600 hover:bg-paper-100 transition-all"
+            href="https://t.me"
+            rel="noopener noreferrer"
+            target="_blank"
+            title="Telegram"
+          >
+            <i class="fa-brands fa-telegram text-sm"></i>
+          </a>
+        </div>
+      </section>
+      <!-- RIGHT COLUMN: Dashboard & Navigation Services (7 Cols) -->
+      <section
+        class="lg:col-span-7 flex flex-col space-y-5"
+        data-purpose="dashboard-apps-column"
+      >
+        <!-- Top Dual Widgets: Hitokoto & Modern Minimal Clock -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <!-- Widget 1: Daily Quote / Hitokoto -->
+          <div
+            class="paper-card rounded-xl p-5 flex flex-col justify-between min-h-[125px] cursor-pointer group hover:bg-paper-50 transition-colors"
+            id="hitokoto-container"
+            title="点击换一句"
+          >
+            <div
+              class="flex items-center justify-between text-xs text-ink-500 pb-1"
+            >
+              <span class="flex items-center gap-1.5 font-medium"
+                ><i class="fa-regular fa-comment-dots text-emerald-600"></i>
+                一言寄语</span
+              >
+              <span
+                class="text-[11px] text-ink-300 group-hover:text-ink-700 flex items-center gap-1 transition-colors"
+              >
+                <i
+                  class="fa-solid fa-rotate-right text-[10px] group-hover:rotate-180 transition-transform duration-300"
+                ></i>
+                换一句
+              </span>
+            </div>
+            <p
+              class="text-sm sm:text-base text-ink-900 leading-snug my-2 font-quote tracking-wide transition-opacity duration-200"
+              id="quote-text"
+            >
+              山风山风等等我。
+            </p>
+            <div
+              class="text-right text-xs text-ink-500 font-light"
+              id="quote-author"
+            >
+              — 「山风山风等等我」
+            </div>
+          </div>
+          <!-- Widget 2: Clean Sans-Serif Realtime Clock -->
+          <div
+            class="paper-card rounded-xl p-5 flex flex-col justify-between min-h-[125px]"
+          >
+            <div class="flex items-center justify-between text-xs text-ink-500">
+              <span class="font-mono font-medium" id="current-date"
+                >2026年 09月 08日 星期二</span
+              >
+              <span
+                class="px-2 py-0.5 rounded text-[11px] bg-amber-50 text-amber-800 font-medium border border-amber-200/70"
+                >晴 24°C</span
+              >
+            </div>
+            <div class="text-center my-0.5">
+              <span
+                class="text-3xl sm:text-4xl font-mono font-bold tracking-tight text-ink-900"
+                id="digital-clock"
+              >
+                01:03:19
+              </span>
+            </div>
+            <div
+              class="flex items-center justify-between text-xs text-ink-500 pt-2 border-t border-black/[0.04]"
+            >
+              <span class="flex items-center gap-1 text-[11px]"
+                ><i class="fa-solid fa-location-dot text-ink-300"></i> 杭州市 ·
+                西湖区</span
+              >
+              <span class="text-[11px] text-ink-500">空气质量 优 28</span>
+            </div>
+          </div>
+        </div>
+        <!-- Navigation Grid Section Header -->
+        <div class="flex items-center justify-between px-1 pt-1">
+          <div
+            class="flex items-center space-x-2 text-sm font-medium text-ink-900"
+          >
+            <i class="fa-solid fa-paperclip text-xs text-ink-500"></i>
+            <span>网站列表与自建服务</span>
+          </div>
+          <div
+            class="text-xs text-ink-500 hover:text-ink-900 cursor-pointer transition flex items-center gap-1"
+          >
+            <span>分类导航</span>
+            <i class="fa-solid fa-angle-right text-[10px]"></i>
+          </div>
+        </div>
+        <!-- Navigation Grid Tiles (Clean, Paper-crafted) -->
+        <div
+          class="grid grid-cols-2 sm:grid-cols-3 gap-3.5"
+          data-purpose="service-tiles-grid"
+        >
+          <!-- Tile 1: 博客 -->
+          <a
+            class="paper-card paper-card-hover rounded-xl p-3.5 sm:p-4 flex items-center space-x-3.5 group"
+            href="#blog"
+          >
+            <div
+              class="w-10 h-10 rounded-lg bg-emerald-50 border border-emerald-200/60 flex items-center justify-center text-emerald-700 flex-shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-colors duration-200"
+            >
+              <i class="fa-solid fa-rss text-sm"></i>
+            </div>
+            <div>
+              <div
+                class="text-sm font-medium text-ink-900 group-hover:text-emerald-700 transition-colors"
+              >
+                博客
+              </div>
+              <div
+                class="text-[11px] text-ink-500 truncate max-w-[80px] sm:max-w-[95px]"
+              >
+                思考与随笔
+              </div>
+            </div>
+          </a>
+          <!-- Tile 2: 网盘 -->
+          <a
+            class="paper-card paper-card-hover rounded-xl p-3.5 sm:p-4 flex items-center space-x-3.5 group"
+            href="#cloud"
+          >
+            <div
+              class="w-10 h-10 rounded-lg bg-sky-50 border border-sky-200/60 flex items-center justify-center text-sky-700 flex-shrink-0 group-hover:bg-sky-600 group-hover:text-white transition-colors duration-200"
+            >
+              <i class="fa-solid fa-cloud text-sm"></i>
+            </div>
+            <div>
+              <div
+                class="text-sm font-medium text-ink-900 group-hover:text-sky-700 transition-colors"
+              >
+                网盘
+              </div>
+              <div
+                class="text-[11px] text-ink-500 truncate max-w-[80px] sm:max-w-[95px]"
+              >
+                私人云存储
+              </div>
+            </div>
+          </a>
+          <!-- Tile 3: 音乐 -->
+          <a
+            class="paper-card paper-card-hover rounded-xl p-3.5 sm:p-4 flex items-center space-x-3.5 group"
+            href="#music"
+          >
+            <div
+              class="w-10 h-10 rounded-lg bg-rose-50 border border-rose-200/60 flex items-center justify-center text-rose-700 flex-shrink-0 group-hover:bg-rose-600 group-hover:text-white transition-colors duration-200"
+            >
+              <i class="fa-solid fa-compact-disc text-sm"></i>
+            </div>
+            <div>
+              <div
+                class="text-sm font-medium text-ink-900 group-hover:text-rose-700 transition-colors"
+              >
+                音乐
+              </div>
+              <div
+                class="text-[11px] text-ink-500 truncate max-w-[80px] sm:max-w-[95px]"
+              >
+                在线随心听
+              </div>
+            </div>
+          </a>
+          <!-- Tile 4: 起始页 -->
+          <a
+            class="paper-card paper-card-hover rounded-xl p-3.5 sm:p-4 flex items-center space-x-3.5 group"
+            href="#startpage"
+          >
+            <div
+              class="w-10 h-10 rounded-lg bg-teal-50 border border-teal-200/60 flex items-center justify-center text-teal-700 flex-shrink-0 group-hover:bg-teal-600 group-hover:text-white transition-colors duration-200"
+            >
+              <i class="fa-solid fa-compass text-sm"></i>
+            </div>
+            <div>
+              <div
+                class="text-sm font-medium text-ink-900 group-hover:text-teal-700 transition-colors"
+              >
+                起始页
+              </div>
+              <div
+                class="text-[11px] text-ink-500 truncate max-w-[80px] sm:max-w-[95px]"
+              >
+                极简聚合搜
+              </div>
+            </div>
+          </a>
+          <!-- Tile 5: 网址集 -->
+          <a
+            class="paper-card paper-card-hover rounded-xl p-3.5 sm:p-4 flex items-center space-x-3.5 group"
+            href="#bookmarks"
+          >
+            <div
+              class="w-10 h-10 rounded-lg bg-amber-50 border border-amber-200/60 flex items-center justify-center text-amber-700 flex-shrink-0 group-hover:bg-amber-600 group-hover:text-white transition-colors duration-200"
+            >
+              <i class="fa-solid fa-bookmark text-sm"></i>
+            </div>
+            <div>
+              <div
+                class="text-sm font-medium text-ink-900 group-hover:text-amber-700 transition-colors"
+              >
+                网址集
+              </div>
+              <div
+                class="text-[11px] text-ink-500 truncate max-w-[80px] sm:max-w-[95px]"
+              >
+                常用精选站
+              </div>
+            </div>
+          </a>
+          <!-- Tile 6: 今日热榜 -->
+          <a
+            class="paper-card paper-card-hover rounded-xl p-3.5 sm:p-4 flex items-center space-x-3.5 group"
+            href="#hot"
+          >
+            <div
+              class="w-10 h-10 rounded-lg bg-orange-50 border border-orange-200/60 flex items-center justify-center text-orange-700 flex-shrink-0 group-hover:bg-orange-600 group-hover:text-white transition-colors duration-200"
+            >
+              <i class="fa-solid fa-fire text-sm"></i>
+            </div>
+            <div>
+              <div
+                class="text-sm font-medium text-ink-900 group-hover:text-orange-700 transition-colors"
+              >
+                今日热榜
+              </div>
+              <div
+                class="text-[11px] text-ink-500 truncate max-w-[80px] sm:max-w-[95px]"
+              >
+                全网实时榜
+              </div>
+            </div>
+          </a>
+        </div>
+        <!-- Pagination Dots -->
+        <div
+          class="flex items-center justify-center space-x-2 pt-1"
+          data-purpose="pagination-dots"
+        >
+          <span class="w-5 h-1.5 rounded-full bg-ink-900 transition-all"></span>
+          <span
+            class="w-2.5 h-1.5 rounded-full bg-ink-300 hover:bg-ink-500 cursor-pointer transition-all"
+          ></span>
+          <span
+            class="w-2.5 h-1.5 rounded-full bg-ink-300 hover:bg-ink-500 cursor-pointer transition-all"
+          ></span>
+        </div>
+      </section>
+    </main>
+    <!-- END: MainContent -->
+    <!-- BEGIN: PageFooter -->
+    <footer
+      class="w-full py-5 text-center text-xs text-ink-500 z-10 space-y-1"
+      data-purpose="site-footer"
+    >
+      <div
+        class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 px-4"
+      >
+        <span
+          >Copyright © 2020 - 2026 &amp; Made with
+          <i class="fa-solid fa-heart text-rose-500 text-[10px]"></i> by
+          xbaimu</span
+        >
+        <span class="hidden sm:inline text-ink-300">|</span>
+        <a
+          class="hover:text-ink-900 transition"
+          href="https://beian.miit.gov.cn/"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          豫ICP备2022018134号-1
+        </a>
+        <span class="hidden sm:inline text-ink-300">|</span>
+        <span class="flex items-center gap-1.5 text-ink-500">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+          系统运行正常 (99.98%)
+        </span>
+      </div>
+    </footer>
+    <!-- END: PageFooter -->
+    <!-- BEGIN: InteractiveClockScript -->
+    <script data-purpose="clock-updater">
+      function updateClock() {
+        const now = new Date();
+
+        // Digital Clock formatting
+        const hours = String(now.getHours()).padStart(2, "0");
+        const minutes = String(now.getMinutes()).padStart(2, "0");
+        const seconds = String(now.getSeconds()).padStart(2, "0");
+
+        const clockEl = document.getElementById("digital-clock");
+        if (clockEl) {
+          clockEl.textContent = `${hours}:${minutes}:${seconds}`;
+        }
+
+        // Date formatting
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, "0");
+        const date = String(now.getDate()).padStart(2, "0");
+        const weekDays = [
+          "星期日",
+          "星期一",
+          "星期二",
+          "星期三",
+          "星期四",
+          "星期五",
+          "星期六",
+        ];
+        const dayName = weekDays[now.getDay()];
+
+        const dateEl = document.getElementById("current-date");
+        if (dateEl) {
+          dateEl.textContent = `${year}年 ${month}月 ${date}日 ${dayName}`;
+        }
+
+        // Update Analog Clock Hands
+        const secDeg = (now.getSeconds() / 60) * 360;
+        const minDeg = ((now.getMinutes() + now.getSeconds() / 60) / 60) * 360;
+        const hourDeg =
+          (((now.getHours() % 12) + now.getMinutes() / 60) / 12) * 360;
+
+        const secHand = document.getElementById("analog-sec");
+        const minHand = document.getElementById("analog-min");
+        const hourHand = document.getElementById("analog-hour");
+
+        if (secHand) secHand.style.transform = `rotate(${secDeg}deg)`;
+        if (minHand) minHand.style.transform = `rotate(${minDeg}deg)`;
+        if (hourHand) hourHand.style.transform = `rotate(${hourDeg}deg)`;
+      }
+
+      setInterval(updateClock, 1000);
+      updateClock();
+    </script>
+    <!-- END: InteractiveClockScript -->
+    <!-- BEGIN: HitokotoScript -->
+    <script data-purpose="hitokoto-refresher">
+      const quotes = [
+        { text: "山风山风等等我。", author: "— 「山风山风等等我」" },
+        { text: "纵有疾风起，人生不言弃。", author: "— 「起风了」" },
+        { text: "给时光以生命，给岁月以文明。", author: "— 「三体」" },
+        { text: "星光不问赶路人，时光不负有心人。", author: "— 「人间词话」" },
+        {
+          text: "愿你在迷茫时，坚信你的珍贵，爱你所爱，行你所行。",
+          author: "— 「无问西东」",
+        },
+      ];
+
+      let currentQuoteIndex = 0;
+      const quoteContainer = document.getElementById("hitokoto-container");
+      const textEl = document.getElementById("quote-text");
+      const authorEl = document.getElementById("quote-author");
+
+      if (quoteContainer && textEl && authorEl) {
+        quoteContainer.addEventListener("click", () => {
+          currentQuoteIndex = (currentQuoteIndex + 1) % quotes.length;
+          textEl.style.opacity = "0";
+          authorEl.style.opacity = "0";
+
+          setTimeout(() => {
+            textEl.textContent = quotes[currentQuoteIndex].text;
+            authorEl.textContent = quotes[currentQuoteIndex].author;
+            textEl.style.opacity = "1";
+            authorEl.style.opacity = "1";
+          }, 180);
+        });
+      }
+
+      // Toggle Fullscreen
+      const fullscreenBtn = document.getElementById("fullscreen-btn");
+      if (fullscreenBtn) {
+        fullscreenBtn.addEventListener("click", () => {
+          if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(() => {});
+          } else {
+            if (document.exitFullscreen) {
+              document.exitFullscreen().catch(() => {});
             }
           }
-        }
+        });
       }
-    }
-  </script>
-<style>
-    /* Paper crafted delicate borders & soft tactile shadows */
-    body {
-      background-color: #f7f8f5;
-      background-image: radial-gradient(#e5e7df 0.8px, transparent 0.8px), radial-gradient(#e5e7df 0.8px, #f7f8f5 0.8px);
-      background-size: 32px 32px;
-      background-position: 0 0, 16px 16px;
-    }
-
-    .paper-card {
-      background: #ffffff;
-      border: 1px solid rgba(0, 0, 0, 0.06);
-      box-shadow: 0 2px 10px rgba(28, 39, 60, 0.03), 0 1px 3px rgba(28, 39, 60, 0.02);
-      transition: all 0.25s ease;
-    }
-
-    .paper-card-hover:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px -4px rgba(28, 39, 60, 0.06), 0 2px 6px rgba(28, 39, 60, 0.03);
-      border-color: rgba(0, 0, 0, 0.1);
-    }
-
-    /* Clean analog clock disc */
-    .clock-disk {
-      background: #2b323b;
-      box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.35), 0 4px 12px rgba(43, 50, 59, 0.15);
-    }
-  </style>
-</head>
-<body class="relative min-h-screen w-full select-none text-ink-900 overflow-x-hidden font-sans antialiased flex flex-col justify-between">
-<!-- BEGIN: TopBarNav -->
-<header class="w-full px-6 md:px-14 pt-7 flex items-center justify-between text-xs tracking-wide text-ink-500 z-20">
-<div class="flex items-center space-x-2.5">
-<span class="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
-<span class="font-mono text-ink-700 font-medium text-[13px] tracking-tight">ONLINE</span>
-<span class="text-ink-300">/</span>
-<span class="text-ink-500 font-normal">独立探索与随想起始页</span>
-</div>
-<!-- Right Utility Toggles -->
-<div class="flex items-center space-x-2">
-<button class="w-8 h-8 rounded-lg paper-card flex items-center justify-center text-ink-500 hover:text-ink-900 transition hover:bg-paper-100" id="fullscreen-btn" title="全屏浏览">
-<i class="fa-solid fa-expand text-xs"></i>
-</button>
-<button class="w-8 h-8 rounded-lg paper-card flex items-center justify-center text-emerald-600 hover:text-emerald-700 transition hover:bg-paper-100" id="theme-btn" title="轻音乐氛围">
-<i class="fa-solid fa-compact-disc animate-spin text-xs" style="animation-duration: 8s;"></i>
-</button>
-</div>
-</header>
-<!-- END: TopBarNav -->
-<!-- BEGIN: MainContent -->
-<main class="w-full max-w-6xl mx-auto px-6 md:px-10 py-10 my-auto z-10 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center" data-purpose="layout-grid">
-<!-- LEFT COLUMN: Identity & Bio (5 Cols) -->
-<section class="lg:col-span-5 flex flex-col justify-center space-y-6" data-purpose="brand-identity-column">
-<!-- Brand Logo / Realtime Analog Quartz Clock Avatar Hybrid -->
-<div class="flex items-center space-x-5 group cursor-default">
-<div class="relative w-20 h-20 sm:w-24 sm:h-24 rounded-full p-1 bg-white border border-black/[0.08] shadow-sm flex-shrink-0">
-<div class="w-full h-full rounded-full clock-disk relative flex items-center justify-center overflow-hidden">
-<!-- 12 / 3 / 6 / 9 Markers -->
-<div class="absolute w-[2px] h-2 bg-slate-400 top-1.5 rounded-full"></div>
-<div class="absolute w-[2px] h-2 bg-slate-400 bottom-1.5 rounded-full"></div>
-<div class="absolute h-[2px] w-2 bg-slate-400 left-1.5 rounded-full"></div>
-<div class="absolute h-[2px] w-2 bg-slate-400 right-1.5 rounded-full"></div>
-<!-- Analog Hands -->
-<div class="absolute w-1 h-5 bg-white/90 rounded-full origin-bottom top-5 sm:top-7 transform -rotate-45" id="analog-hour"></div>
-<div class="absolute w-0.5 h-7 bg-sky-300 rounded-full origin-bottom top-3 sm:top-5 transform rotate-45" id="analog-min"></div>
-<div class="absolute w-[1px] h-8 bg-rose-400 rounded-full origin-bottom top-2.5 sm:top-4 transform rotate-90" id="analog-sec"></div>
-<div class="w-1.5 h-1.5 rounded-full bg-rose-400 z-10"></div>
-</div>
-</div>
-<!-- Site Brand Name & Tagline -->
-<div class="flex flex-col">
-<div class="flex items-baseline space-x-1">
-<h1 class="text-4xl sm:text-5xl font-hand tracking-tight text-ink-900 font-bold">
-              imsyy
-            </h1>
-<span class="text-xl font-mono text-ink-500 font-normal">.top</span>
-</div>
-<p class="text-xs sm:text-sm text-ink-500 tracking-wider mt-1.5 font-normal flex items-center gap-1.5">
-<i class="fa-solid fa-feather text-[10px] text-emerald-600"></i>
-            静水流深 · 沧笙踏歌
-          </p>
-</div>
-</div>
-<!-- Hello World Note Card -->
-<article class="paper-card rounded-xl p-5 sm:p-6 relative overflow-hidden" data-purpose="manifesto-card">
-<span class="text-3xl text-ink-300/40 font-serif leading-none absolute top-3 left-4 select-none">“</span>
-<div class="relative z-10 pl-5 pr-2 pt-1">
-<div class="flex items-center justify-between">
-<h2 class="text-base sm:text-lg font-mono font-semibold text-ink-900 tracking-tight flex items-center gap-2">
-<span>Hello World!</span>
-</h2>
-<span class="text-[11px] font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200/60 font-medium">v3.4.0</span>
-</div>
-<p class="mt-2.5 text-sm text-ink-700 font-normal leading-relaxed">
-            一个建立于 21 世纪的小站，存活于互联网的边缘。
-          </p>
-<div class="mt-3.5 pt-3 border-t border-black/[0.04] flex items-center justify-between text-xs text-ink-500">
-<span class="text-[12px]">代码、日常记录与生活偶得</span>
-<span class="text-[11px] text-ink-300">随遇而安</span>
-</div>
-</div>
-<span class="text-3xl text-ink-300/40 font-serif leading-none absolute bottom-2 right-4 select-none">”</span>
-</article>
-<!-- Developer & Social Hub Icon Bar (Clean Monochrome) -->
-<div class="flex items-center space-x-3 pt-1" data-purpose="social-icons">
-<a class="w-9 h-9 rounded-lg paper-card flex items-center justify-center text-ink-700 hover:text-ink-900 hover:bg-paper-100 transition-all" href="https://github.com" rel="noopener noreferrer" target="_blank" title="GitHub">
-<i class="fa-brands fa-github text-base"></i>
-</a>
-<a class="w-9 h-9 rounded-lg paper-card flex items-center justify-center text-ink-700 hover:text-[#00a1d6] hover:bg-paper-100 transition-all" href="https://bilibili.com" rel="noopener noreferrer" target="_blank" title="哔哩哔哩">
-<i class="fa-brands fa-bilibili text-sm"></i>
-</a>
-<a class="w-9 h-9 rounded-lg paper-card flex items-center justify-center text-ink-700 hover:text-[#171a21] hover:bg-paper-100 transition-all" href="#" title="Steam">
-<i class="fa-brands fa-steam text-base"></i>
-</a>
-<a class="w-9 h-9 rounded-lg paper-card flex items-center justify-center text-ink-700 hover:text-emerald-600 hover:bg-paper-100 transition-all" href="mailto:contact@imsyy.top" title="电子邮件">
-<i class="fa-regular fa-envelope text-sm"></i>
-</a>
-<a class="w-9 h-9 rounded-lg paper-card flex items-center justify-center text-ink-700 hover:text-ink-900 hover:bg-paper-100 transition-all" href="https://twitter.com" rel="noopener noreferrer" target="_blank" title="X / Twitter">
-<i class="fa-brands fa-x-twitter text-sm"></i>
-</a>
-<a class="w-9 h-9 rounded-lg paper-card flex items-center justify-center text-ink-700 hover:text-sky-600 hover:bg-paper-100 transition-all" href="https://t.me" rel="noopener noreferrer" target="_blank" title="Telegram">
-<i class="fa-brands fa-telegram text-sm"></i>
-</a>
-</div>
-</section>
-<!-- RIGHT COLUMN: Dashboard & Navigation Services (7 Cols) -->
-<section class="lg:col-span-7 flex flex-col space-y-5" data-purpose="dashboard-apps-column">
-<!-- Top Dual Widgets: Hitokoto & Modern Minimal Clock -->
-<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-<!-- Widget 1: Daily Quote / Hitokoto -->
-<div class="paper-card rounded-xl p-5 flex flex-col justify-between min-h-[125px] cursor-pointer group hover:bg-paper-50 transition-colors" id="hitokoto-container" title="点击换一句">
-<div class="flex items-center justify-between text-xs text-ink-500 pb-1">
-<span class="flex items-center gap-1.5 font-medium"><i class="fa-regular fa-comment-dots text-emerald-600"></i> 一言寄语</span>
-<span class="text-[11px] text-ink-300 group-hover:text-ink-700 flex items-center gap-1 transition-colors">
-<i class="fa-solid fa-rotate-right text-[10px] group-hover:rotate-180 transition-transform duration-300"></i> 换一句
-            </span>
-</div>
-<p class="text-sm sm:text-base text-ink-900 leading-snug my-2 font-quote tracking-wide transition-opacity duration-200" id="quote-text">
-            山风山风等等我。
-          </p>
-<div class="text-right text-xs text-ink-500 font-light" id="quote-author">
-            — 「山风山风等等我」
-          </div>
-</div>
-<!-- Widget 2: Clean Sans-Serif Realtime Clock -->
-<div class="paper-card rounded-xl p-5 flex flex-col justify-between min-h-[125px]">
-<div class="flex items-center justify-between text-xs text-ink-500">
-<span class="font-mono font-medium" id="current-date">2026年 09月 08日 星期二</span>
-<span class="px-2 py-0.5 rounded text-[11px] bg-amber-50 text-amber-800 font-medium border border-amber-200/70">晴 24°C</span>
-</div>
-<div class="text-center my-0.5">
-<span class="text-3xl sm:text-4xl font-mono font-bold tracking-tight text-ink-900" id="digital-clock">
-              01:03:19
-            </span>
-</div>
-<div class="flex items-center justify-between text-xs text-ink-500 pt-2 border-t border-black/[0.04]">
-<span class="flex items-center gap-1 text-[11px]"><i class="fa-solid fa-location-dot text-ink-300"></i> 杭州市 · 西湖区</span>
-<span class="text-[11px] text-ink-500">空气质量 优 28</span>
-</div>
-</div>
-</div>
-<!-- Navigation Grid Section Header -->
-<div class="flex items-center justify-between px-1 pt-1">
-<div class="flex items-center space-x-2 text-sm font-medium text-ink-900">
-<i class="fa-solid fa-paperclip text-xs text-ink-500"></i>
-<span>网站列表与自建服务</span>
-</div>
-<div class="text-xs text-ink-500 hover:text-ink-900 cursor-pointer transition flex items-center gap-1">
-<span>分类导航</span> <i class="fa-solid fa-angle-right text-[10px]"></i>
-</div>
-</div>
-<!-- Navigation Grid Tiles (Clean, Paper-crafted) -->
-<div class="grid grid-cols-2 sm:grid-cols-3 gap-3.5" data-purpose="service-tiles-grid">
-<!-- Tile 1: 博客 -->
-<a class="paper-card paper-card-hover rounded-xl p-3.5 sm:p-4 flex items-center space-x-3.5 group" href="#blog">
-<div class="w-10 h-10 rounded-lg bg-emerald-50 border border-emerald-200/60 flex items-center justify-center text-emerald-700 flex-shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-colors duration-200">
-<i class="fa-solid fa-rss text-sm"></i>
-</div>
-<div>
-<div class="text-sm font-medium text-ink-900 group-hover:text-emerald-700 transition-colors">博客</div>
-<div class="text-[11px] text-ink-500 truncate max-w-[80px] sm:max-w-[95px]">思考与随笔</div>
-</div>
-</a>
-<!-- Tile 2: 网盘 -->
-<a class="paper-card paper-card-hover rounded-xl p-3.5 sm:p-4 flex items-center space-x-3.5 group" href="#cloud">
-<div class="w-10 h-10 rounded-lg bg-sky-50 border border-sky-200/60 flex items-center justify-center text-sky-700 flex-shrink-0 group-hover:bg-sky-600 group-hover:text-white transition-colors duration-200">
-<i class="fa-solid fa-cloud text-sm"></i>
-</div>
-<div>
-<div class="text-sm font-medium text-ink-900 group-hover:text-sky-700 transition-colors">网盘</div>
-<div class="text-[11px] text-ink-500 truncate max-w-[80px] sm:max-w-[95px]">私人云存储</div>
-</div>
-</a>
-<!-- Tile 3: 音乐 -->
-<a class="paper-card paper-card-hover rounded-xl p-3.5 sm:p-4 flex items-center space-x-3.5 group" href="#music">
-<div class="w-10 h-10 rounded-lg bg-rose-50 border border-rose-200/60 flex items-center justify-center text-rose-700 flex-shrink-0 group-hover:bg-rose-600 group-hover:text-white transition-colors duration-200">
-<i class="fa-solid fa-compact-disc text-sm"></i>
-</div>
-<div>
-<div class="text-sm font-medium text-ink-900 group-hover:text-rose-700 transition-colors">音乐</div>
-<div class="text-[11px] text-ink-500 truncate max-w-[80px] sm:max-w-[95px]">在线随心听</div>
-</div>
-</a>
-<!-- Tile 4: 起始页 -->
-<a class="paper-card paper-card-hover rounded-xl p-3.5 sm:p-4 flex items-center space-x-3.5 group" href="#startpage">
-<div class="w-10 h-10 rounded-lg bg-teal-50 border border-teal-200/60 flex items-center justify-center text-teal-700 flex-shrink-0 group-hover:bg-teal-600 group-hover:text-white transition-colors duration-200">
-<i class="fa-solid fa-compass text-sm"></i>
-</div>
-<div>
-<div class="text-sm font-medium text-ink-900 group-hover:text-teal-700 transition-colors">起始页</div>
-<div class="text-[11px] text-ink-500 truncate max-w-[80px] sm:max-w-[95px]">极简聚合搜</div>
-</div>
-</a>
-<!-- Tile 5: 网址集 -->
-<a class="paper-card paper-card-hover rounded-xl p-3.5 sm:p-4 flex items-center space-x-3.5 group" href="#bookmarks">
-<div class="w-10 h-10 rounded-lg bg-amber-50 border border-amber-200/60 flex items-center justify-center text-amber-700 flex-shrink-0 group-hover:bg-amber-600 group-hover:text-white transition-colors duration-200">
-<i class="fa-solid fa-bookmark text-sm"></i>
-</div>
-<div>
-<div class="text-sm font-medium text-ink-900 group-hover:text-amber-700 transition-colors">网址集</div>
-<div class="text-[11px] text-ink-500 truncate max-w-[80px] sm:max-w-[95px]">常用精选站</div>
-</div>
-</a>
-<!-- Tile 6: 今日热榜 -->
-<a class="paper-card paper-card-hover rounded-xl p-3.5 sm:p-4 flex items-center space-x-3.5 group" href="#hot">
-<div class="w-10 h-10 rounded-lg bg-orange-50 border border-orange-200/60 flex items-center justify-center text-orange-700 flex-shrink-0 group-hover:bg-orange-600 group-hover:text-white transition-colors duration-200">
-<i class="fa-solid fa-fire text-sm"></i>
-</div>
-<div>
-<div class="text-sm font-medium text-ink-900 group-hover:text-orange-700 transition-colors">今日热榜</div>
-<div class="text-[11px] text-ink-500 truncate max-w-[80px] sm:max-w-[95px]">全网实时榜</div>
-</div>
-</a>
-</div>
-<!-- Pagination Dots -->
-<div class="flex items-center justify-center space-x-2 pt-1" data-purpose="pagination-dots">
-<span class="w-5 h-1.5 rounded-full bg-ink-900 transition-all"></span>
-<span class="w-2.5 h-1.5 rounded-full bg-ink-300 hover:bg-ink-500 cursor-pointer transition-all"></span>
-<span class="w-2.5 h-1.5 rounded-full bg-ink-300 hover:bg-ink-500 cursor-pointer transition-all"></span>
-</div>
-</section>
-</main>
-<!-- END: MainContent -->
-<!-- BEGIN: PageFooter -->
-<footer class="w-full py-5 text-center text-xs text-ink-500 z-10 space-y-1" data-purpose="site-footer">
-<div class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 px-4">
-<span>Copyright © 2020 - 2026 &amp; Made with <i class="fa-solid fa-heart text-rose-500 text-[10px]"></i> by imsyy</span>
-<span class="hidden sm:inline text-ink-300">|</span>
-<a class="hover:text-ink-900 transition" href="https://beian.miit.gov.cn/" rel="noopener noreferrer" target="_blank">
-        豫ICP备2022018134号-1
-      </a>
-<span class="hidden sm:inline text-ink-300">|</span>
-<span class="flex items-center gap-1.5 text-ink-500">
-<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> 系统运行正常 (99.98%)
-      </span>
-</div>
-</footer>
-<!-- END: PageFooter -->
-<!-- BEGIN: InteractiveClockScript -->
-<script data-purpose="clock-updater">
-    function updateClock() {
-      const now = new Date();
-      
-      // Digital Clock formatting
-      const hours = String(now.getHours()).padStart(2, '0');
-      const minutes = String(now.getMinutes()).padStart(2, '0');
-      const seconds = String(now.getSeconds()).padStart(2, '0');
-      
-      const clockEl = document.getElementById('digital-clock');
-      if (clockEl) {
-        clockEl.textContent = `${hours}:${minutes}:${seconds}`;
-      }
-
-      // Date formatting
-      const year = now.getFullYear();
-      const month = String(now.getMonth() + 1).padStart(2, '0');
-      const date = String(now.getDate()).padStart(2, '0');
-      const weekDays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
-      const dayName = weekDays[now.getDay()];
-
-      const dateEl = document.getElementById('current-date');
-      if (dateEl) {
-        dateEl.textContent = `${year}年 ${month}月 ${date}日 ${dayName}`;
-      }
-
-      // Update Analog Clock Hands
-      const secDeg = (now.getSeconds() / 60) * 360;
-      const minDeg = ((now.getMinutes() + now.getSeconds() / 60) / 60) * 360;
-      const hourDeg = (((now.getHours() % 12) + now.getMinutes() / 60) / 12) * 360;
-
-      const secHand = document.getElementById('analog-sec');
-      const minHand = document.getElementById('analog-min');
-      const hourHand = document.getElementById('analog-hour');
-
-      if (secHand) secHand.style.transform = `rotate(${secDeg}deg)`;
-      if (minHand) minHand.style.transform = `rotate(${minDeg}deg)`;
-      if (hourHand) hourHand.style.transform = `rotate(${hourDeg}deg)`;
-    }
-
-    setInterval(updateClock, 1000);
-    updateClock();
-  </script>
-<!-- END: InteractiveClockScript -->
-<!-- BEGIN: HitokotoScript -->
-<script data-purpose="hitokoto-refresher">
-    const quotes = [
-      { text: "山风山风等等我。", author: "— 「山风山风等等我」" },
-      { text: "纵有疾风起，人生不言弃。", author: "— 「起风了」" },
-      { text: "给时光以生命，给岁月以文明。", author: "— 「三体」" },
-      { text: "星光不问赶路人，时光不负有心人。", author: "— 「人间词话」" },
-      { text: "愿你在迷茫时，坚信你的珍贵，爱你所爱，行你所行。", author: "— 「无问西东」" }
-    ];
-
-    let currentQuoteIndex = 0;
-    const quoteContainer = document.getElementById('hitokoto-container');
-    const textEl = document.getElementById('quote-text');
-    const authorEl = document.getElementById('quote-author');
-
-    if (quoteContainer && textEl && authorEl) {
-      quoteContainer.addEventListener('click', () => {
-        currentQuoteIndex = (currentQuoteIndex + 1) % quotes.length;
-        textEl.style.opacity = '0';
-        authorEl.style.opacity = '0';
-        
-        setTimeout(() => {
-          textEl.textContent = quotes[currentQuoteIndex].text;
-          authorEl.textContent = quotes[currentQuoteIndex].author;
-          textEl.style.opacity = '1';
-          authorEl.style.opacity = '1';
-        }, 180);
-      });
-    }
-
-    // Toggle Fullscreen
-    const fullscreenBtn = document.getElementById('fullscreen-btn');
-    if (fullscreenBtn) {
-      fullscreenBtn.addEventListener('click', () => {
-        if (!document.fullscreenElement) {
-          document.documentElement.requestFullscreen().catch(() => {});
-        } else {
-          if (document.exitFullscreen) {
-            document.exitFullscreen().catch(() => {});
-          }
-        }
-      });
-    }
-  </script>
-<!-- END: HitokotoScript -->
-</body></html>
+    </script>
+    <!-- END: HitokotoScript -->
+  </body>
+</html>

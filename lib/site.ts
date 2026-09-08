@@ -1,9 +1,9 @@
 // 模板内容集中配置；服务地址使用示例公共站点，部署前替换为自己的服务。
 export const site = {
-  name: "imsyy",
+  name: "xbaimu",
   domain: ".top",
   tagline: "静水流深 · 沧笙踏歌",
-  email: "contact@imsyy.top",
+  email: "contact@xbaimu.cn",
   registration: "豫ICP备2022018134号-1",
   weather: {
     condition: "晴",
@@ -19,7 +19,7 @@ export const services = [
     description: "思考与随笔",
     color: "green",
     category: "personal",
-    href: "https://blog.imsyy.top",
+    href: "https://blog.xbaimu.cn",
   },
   {
     id: "cloud",
@@ -51,7 +51,7 @@ export const services = [
     description: "常用精选站",
     color: "amber",
     category: "tools",
-    href: "https://nav.imsyy.top",
+    href: "https://nav.xbaimu.cn",
   },
   {
     id: "hot",
