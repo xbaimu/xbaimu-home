@@ -6,6 +6,7 @@ export interface SiteSettings {
   tagline: string;
   email: string;
   registration: string;
+  police_registration: string;
   location: string;
   areacode: string;
 }

@@ -6,6 +6,7 @@ export const site = {
   tagline: "静水流深 · 沧笙踏歌",
   email: "contact@xbaimu.cn",
   registration: "豫ICP备2022018134号-1",
+  police_registration: "",
   location: "杭州市 · 西湖区",
   areacode: "",
   weather: {

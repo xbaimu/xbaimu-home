@@ -8,7 +8,7 @@ const contentTag = 'home-content';
 export function getHomeContent() {
   return unstable_cache(
     async () => readContent(getDatabase(), true),
-    ['home-content-v3', databasePath()],
+    ['home-content-v4', databasePath()],
     { tags: [contentTag], revalidate: false },
   )();
 }

@@ -526,7 +526,7 @@ export default function Settings({
                       }
                     />
                   </Field>
-                  <Field label="联系邮箱">
+                  <Field label="联系邮箱" wide>
                     <input
                       type="email"
                       value={content.site.email}
@@ -552,6 +552,19 @@ export default function Settings({
                             ...content.site,
                             registration: e.target.value,
                           },
+                        })
+                      }
+                    />
+                  </Field>
+                  <Field label="公安备案信息" hint="填写完整公安备案号，留空则不显示。">
+                    <input
+                      value={content.site.police_registration}
+                      maxLength={100}
+                      placeholder="例如：浙公网安备 33010602000000号"
+                      onChange={(e) =>
+                        edit({
+                          ...content,
+                          site: { ...content.site, police_registration: e.target.value },
                         })
                       }
                     />

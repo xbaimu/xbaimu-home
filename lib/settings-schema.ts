@@ -29,6 +29,7 @@ export const homeContentSchema = z
           z.string().trim().email("邮箱格式不正确").max(254),
         ]),
         registration: shortText(100),
+        police_registration: shortText(100),
         location: shortText(100),
         areacode: shortText(64),
       })

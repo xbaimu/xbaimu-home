@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import {
   FaGithub,
   FaBilibili,
@@ -144,7 +145,7 @@ export default function Home({
           <span className="status-dot" />
           <span className="online-label">ONLINE</span>
           <span className="separator">/</span>
-          <span className="topbar-description">独立探索与随想起始页</span>
+          <span className="topbar-description">在这里，发现日常的可能</span>
         </div>
         <div className="utilities">
           <button
@@ -377,15 +378,30 @@ export default function Home({
             {version}
           </span>
         </span>
-        <span className="footer-divider">|</span>
-        <a
-          href="https://beian.miit.gov.cn/"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          {site.registration}
-        </a>
-        <span className="footer-divider">|</span>
+        {(site.registration || site.police_registration) && (
+          <>
+            <span className="footer-divider">|</span>
+            <div className="footer-registrations">
+              {site.registration && (
+                <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">
+                  {site.registration}
+                </a>
+              )}
+              {site.police_registration && (
+                <a
+                  className="police-registration"
+                  href={`https://beian.mps.gov.cn/#/query/webSearch?code=${encodeURIComponent(site.police_registration.replace(/\D/g, ""))}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Image src="/images/ga_icon.png" alt="" width={18} height={20} unoptimized />
+                  {site.police_registration}
+                </a>
+              )}
+            </div>
+            <span className="footer-divider">|</span>
+          </>
+        )}
         <span className="system-status" title="模板展示数据，尚未接入运行监控">
           <span className="status-dot" />
           系统运行正常 (99.98%)
