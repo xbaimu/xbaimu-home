@@ -17,7 +17,7 @@ function fixture() {
 test('初始化三张表、导入种子数据；重开不会覆盖修改或重新填充空列表', () => {
   const f = fixture();
   try {
-    assert.equal(f.db.pragma('user_version', { simple: true }), 2);
+    assert.equal(f.db.pragma('user_version', { simple: true }), 3);
     assert.equal(f.db.pragma('journal_mode', { simple: true }), 'wal');
     assert.deepEqual(f.db.prepare("SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name").all(),
       [{ name: 'quotes' }, { name: 'services' }, { name: 'site_settings' }]);
@@ -25,6 +25,8 @@ test('初始化三张表、导入种子数据；重开不会覆盖修改或重�
     assert.equal(content.services.length, services.length);
     assert.equal(content.quotes.length, quotes.length);
     content.site.name = '持久化站点';
+    content.site.location = '上海市';
+    content.site.areacode = '001234';
     content.services = [];
     content.quotes = [];
     writeContent(f.db, content);
@@ -71,11 +73,11 @@ test('写入失败会回滚整个事务，危险链接被拒绝，站点设置�
 test('拒绝读取更高版本的数据库', () => {
   const f = fixture();
   try {
-    f.db.pragma('user_version = 3');
+    f.db.pragma('user_version = 4');
     f.db.close();
     assert.throws(() => openDatabase(f.path), /高于/);
     const db = new Database(f.path);
-    try { assert.equal(db.pragma('user_version', { simple: true }), 3); } finally { db.close(); }
+    try { assert.equal(db.pragma('user_version', { simple: true }), 4); } finally { db.close(); }
   } finally { f.cleanup(); }
 });
 
@@ -83,7 +85,7 @@ test('拒绝读取更高版本的数据库', () => {
 test('版本 1 自动迁移图标，保留旧内容；选择图标后重开仍然保留', () => {
   const f = fixture();
   try {
-    f.db.exec("ALTER TABLE services DROP COLUMN icon; PRAGMA user_version = 1;");
+    f.db.exec("ALTER TABLE site_settings DROP COLUMN location; ALTER TABLE site_settings DROP COLUMN areacode; ALTER TABLE services DROP COLUMN icon; PRAGMA user_version = 1;");
     f.db.prepare("UPDATE services SET title = '已修改博客' WHERE id = 'blog'").run();
     f.db.prepare("UPDATE services SET id = 'custom-service' WHERE id = 'cloud'").run();
     f.db.close();
@@ -101,5 +103,24 @@ test('版本 1 自动迁移图标，保留旧内容；选择图标后重开仍�
     const reopened = openDatabase(f.path);
     try { assert.equal(readContent(reopened).services.find((item) => item.id === 'blog')!.icon, 'game'); }
     finally { reopened.close(); }
+  } finally { f.cleanup(); }
+});
+
+test('版本 2 自动迁移位置设置，保留已有内容并允许清空', () => {
+  const f = fixture();
+  try {
+    const original = readContent(f.db);
+    f.db.exec('ALTER TABLE site_settings DROP COLUMN location; ALTER TABLE site_settings DROP COLUMN areacode; PRAGMA user_version = 2;');
+    f.db.close();
+    const migrated = openDatabase(f.path);
+    try {
+      assert.equal(migrated.pragma('user_version', { simple: true }), 3);
+      assert.deepEqual(readContent(migrated), original);
+      const content = readContent(migrated);
+      content.site.location = '';
+      content.site.areacode = '';
+      writeContent(migrated, content);
+      assert.deepEqual(readContent(migrated), content);
+    } finally { migrated.close(); }
   } finally { f.cleanup(); }
 });

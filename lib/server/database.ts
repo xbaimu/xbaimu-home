@@ -5,7 +5,7 @@ import { dirname, resolve } from 'node:path';
 import { site, services, quotes } from '../site';
 import type { HomeContent, Quote, Service, SiteSettings } from '../site-types';
 
-const schemaVersion = 2;
+const schemaVersion = 3;
 
 // 懒初始化：构建不打开数据库。全局连接也可跨开发环境热更新复用。
 const globalDatabase = globalThis as typeof globalThis & {
@@ -38,6 +38,8 @@ export function openDatabase(path: string): Database.Database {
             tagline TEXT NOT NULL DEFAULT '',
             email TEXT NOT NULL DEFAULT '',
             registration TEXT NOT NULL DEFAULT '',
+            location TEXT NOT NULL DEFAULT '',
+            areacode TEXT NOT NULL DEFAULT '',
             updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
           );
           CREATE TABLE services (
@@ -77,6 +79,11 @@ export function openDatabase(path: string): Database.Database {
             WHEN 'hot' THEN 'fire' ELSE 'link' END;`);
         db.pragma(`user_version = ${schemaVersion}`);
       }
+      if (version === 1 || version === 2) {
+        db.exec(`ALTER TABLE site_settings ADD COLUMN location TEXT NOT NULL DEFAULT '杭州市 · 西湖区';
+          ALTER TABLE site_settings ADD COLUMN areacode TEXT NOT NULL DEFAULT '';`);
+        db.pragma(`user_version = ${schemaVersion}`);
+      }
     }).immediate();
     return db;
   } catch (error) {
@@ -101,7 +108,7 @@ type QuoteRow = Omit<Quote, 'enabled'> & { enabled: number };
 
 export function readContent(db: Database.Database, publicOnly = false): HomeContent {
   return db.transaction(() => {
-    const site = db.prepare(`SELECT name, domain, tagline, email, registration
+    const site = db.prepare(`SELECT name, domain, tagline, email, registration, location, areacode
       FROM site_settings WHERE id = 1`).get() as SiteSettings | undefined;
     if (!site) throw new Error('缺少站点设置');
     const filter = publicOnly ? 'WHERE enabled = 1' : '';
@@ -126,11 +133,12 @@ export function writeContent(db: Database.Database, content: HomeContent) {
     }
   }
   db.transaction(() => {
-    db.prepare(`INSERT INTO site_settings (id, name, domain, tagline, email, registration)
-      VALUES (1, @name, @domain, @tagline, @email, @registration)
+    db.prepare(`INSERT INTO site_settings (id, name, domain, tagline, email, registration, location, areacode)
+      VALUES (1, @name, @domain, @tagline, @email, @registration, @location, @areacode)
       ON CONFLICT(id) DO UPDATE SET name = excluded.name, domain = excluded.domain,
       tagline = excluded.tagline, email = excluded.email,
-      registration = excluded.registration, updated_at = CURRENT_TIMESTAMP`).run(content.site);
+      registration = excluded.registration, location = excluded.location,
+      areacode = excluded.areacode, updated_at = CURRENT_TIMESTAMP`).run(content.site);
     db.exec('DELETE FROM services; DELETE FROM quotes;');
     const insertService = db.prepare(`INSERT INTO services
       (id, title, description, href, icon, color, category, sort_order, enabled)

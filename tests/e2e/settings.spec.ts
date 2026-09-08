@@ -46,6 +46,8 @@ test("设置页登录、编辑、保存、缓存更新、过期续登与退出",
   // 先读取首页缓存，再通过设置页保存，验证缓存确实失效。
   await page.request.get("/");
   await page.getByLabel("站点名称").fill("小站表单验证");
+  await page.getByLabel("位置名称").fill("上海市 · 徐汇区");
+  await page.getByLabel("地区 areacode").fill("001234");
   await page.getByLabel("个性签名").fill("把热爱，写进每一个日常。");
   await page.screenshot({
     path: "test-results/settings-desktop.png",
@@ -56,6 +58,14 @@ test("设置页登录、编辑、保存、缓存更新、过期续登与退出",
     "已保存，首页内容已更新",
   );
   expect(await (await page.request.get("/")).text()).toContain("小站表单验证");
+
+  await page.reload();
+  await expect(page.getByLabel("位置名称")).toHaveValue("上海市 · 徐汇区");
+  await expect(page.getByLabel("地区 areacode")).toHaveValue("001234");
+  const locationPage = await context.newPage();
+  await locationPage.goto("/");
+  await expect(locationPage.locator(".weather-footer")).toContainText("上海市 · 徐汇区");
+  await locationPage.close();
 
   await page.getByRole("button", { name: /^服务链接/ }).click();
   await page.getByRole("button", { name: /添加服务/ }).click();

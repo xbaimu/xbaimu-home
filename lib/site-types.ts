@@ -6,6 +6,8 @@ export interface SiteSettings {
   tagline: string;
   email: string;
   registration: string;
+  location: string;
+  areacode: string;
 }
 
 export interface Service {

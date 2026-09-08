@@ -499,6 +499,33 @@ export default function Settings({
                       }
                     />
                   </Field>
+                  <Field label="位置名称" hint="显示在首页时钟下方，可留空。">
+                    <input
+                      value={content.site.location}
+                      maxLength={100}
+                      placeholder="例如：杭州市 · 西湖区"
+                      onChange={(e) =>
+                        edit({
+                          ...content,
+                          site: { ...content.site, location: e.target.value },
+                        })
+                      }
+                    />
+                  </Field>
+                  <Field label="地区 areacode" hint="填写天气服务对应的地区编码，可留空。">
+                    <input
+                      type="text"
+                      value={content.site.areacode}
+                      maxLength={64}
+                      placeholder="填写所用天气服务的地区编码"
+                      onChange={(e) =>
+                        edit({
+                          ...content,
+                          site: { ...content.site, areacode: e.target.value },
+                        })
+                      }
+                    />
+                  </Field>
                   <Field label="联系邮箱">
                     <input
                       type="email"

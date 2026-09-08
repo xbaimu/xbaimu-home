@@ -38,7 +38,13 @@ const socials = (email: string) => [
 ];
 const pad = (n: number) => String(n).padStart(2, "0");
 
-export default function Home({ version, content }: { version: string; content: HomeContent }) {
+export default function Home({
+  version,
+  content,
+}: {
+  version: string;
+  content: HomeContent;
+}) {
   const { site, services, quotes } = content;
   const [now, setNow] = useState<Date | null>(null);
   const [quoteIndex, setQuoteIndex] = useState(0);
@@ -123,7 +129,10 @@ export default function Home({ version, content }: { version: string; content: H
   const seconds = now?.getSeconds() ?? 0;
   const minutes = (now?.getMinutes() ?? 10) + seconds / 60;
   const hours = ((now?.getHours() ?? 10) % 12) + minutes / 60;
-  const quote = quotes[quoteIndex % quotes.length] ?? { text: "暂无寄语", author: "" };
+  const quote = quotes[quoteIndex % quotes.length] ?? {
+    text: "暂无寄语",
+    author: "",
+  };
   const date = now
     ? `${now.getFullYear()}年 ${pad(now.getMonth() + 1)}月 ${pad(now.getDate())}日 星期${"日一二三四五六"[now.getDay()]}`
     : "正在读取本地日期";
@@ -271,19 +280,21 @@ export default function Home({ version, content }: { version: string; content: H
                   ? `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(seconds)}`
                   : "--:--:--"}
               </time>
-              <div className="weather-footer" title="模板地点及空气质量示例">
+              <div className="weather-footer">
                 <span>
                   <FaLocationDot />
-                  {defaults.weather.location}
+                  {site.location || "未设置位置"}
                 </span>
-                <span>空气质量 {defaults.weather.air}</span>
+                <span title="模板空气质量示例，尚未接入实时数据">
+                  空气质量 {defaults.weather.air}
+                </span>
               </div>
             </div>
           </div>
           <div className="services-heading">
             <h2>
               <FaPaperclip />
-              网站列表与自建服务
+              随风飘落·随性而为
             </h2>
             <div className="category-control" ref={menu}>
               <button
