@@ -2,6 +2,8 @@
 
 基于 Next.js App Router + TypeScript + 手写 CSS 的纸本风格个人主页。项目直接建立在当前仓库根目录。
 
+灵感来源：[imsyy/home](https://github.com/imsyy/home)。
+
 ```bash
 npm install
 npm run dev
