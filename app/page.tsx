@@ -1,7 +1,13 @@
+import { connection } from 'next/server';
 import Home from '@/components/home';
+import { getHomeContent } from '@/lib/server/home-content';
 import { version } from '@/package.json';
 
-// 在构建时静态生成，版本号随本次构建固定。
-export const dynamic = 'force-static';
+export const runtime = 'nodejs';
 
-export default function Page() { return <Home version={`v${version}`} />; }
+export default async function Page() {
+  // 等待运行时请求，避免构建阶段创建或读取部署环境的数据库。
+  await connection();
+  const content = await getHomeContent();
+  return <Home version={`v${version}`} content={content} />;
+}

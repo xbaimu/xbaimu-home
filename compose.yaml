@@ -5,6 +5,11 @@ services:
       context: .
     ports:
       - "${PORT:-3000}:3000"
+    environment:
+      ADMIN_KEY: ${ADMIN_KEY:-}
+      ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET:-}
+      ADMIN_COOKIE_SECURE: ${ADMIN_COOKIE_SECURE:-true}
+      APP_ORIGIN: ${APP_ORIGIN:-}
     volumes:
       - home-data:/app/data
     restart: unless-stopped

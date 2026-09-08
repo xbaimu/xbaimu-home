@@ -24,9 +24,11 @@ import {
   FaFire,
   FaHeart,
 } from "react-icons/fa6";
-import { quotes, services, site } from "@/lib/site";
+import { site as defaults } from "@/lib/site";
+import type { HomeContent } from "@/lib/site-types";
+import type { IconType } from "react-icons";
 
-const icons = {
+const icons: Record<string, IconType> = {
   blog: FaRss,
   cloud: FaCloud,
   music: FaCompactDisc,
@@ -39,17 +41,18 @@ const categories = [
   { id: "personal", label: "生活随笔" },
   { id: "tools", label: "实用工具" },
 ];
-const socials = [
+const socials = (email: string) => [
   { label: "GitHub", href: "https://github.com/xbaimu", icon: FaGithub },
   { label: "哔哩哔哩", href: "https://www.bilibili.com", icon: FaBilibili },
   { label: "Steam", href: "https://store.steampowered.com", icon: FaSteam },
-  { label: "电子邮件", href: `mailto:${site.email}`, icon: FaRegEnvelope },
+  { label: "电子邮件", href: `mailto:${email}`, icon: FaRegEnvelope },
   { label: "X / Twitter", href: "https://x.com", icon: FaXTwitter },
   { label: "Telegram", href: "https://telegram.org", icon: FaTelegram },
 ];
 const pad = (n: number) => String(n).padStart(2, "0");
 
-export default function Home({ version }: { version: string }) {
+export default function Home({ version, content }: { version: string; content: HomeContent }) {
+  const { site, services, quotes } = content;
   const [now, setNow] = useState<Date | null>(null);
   const [quoteIndex, setQuoteIndex] = useState(0);
   const [category, setCategory] = useState("all");
@@ -133,7 +136,7 @@ export default function Home({ version }: { version: string }) {
   const seconds = now?.getSeconds() ?? 0;
   const minutes = (now?.getMinutes() ?? 10) + seconds / 60;
   const hours = ((now?.getHours() ?? 10) % 12) + minutes / 60;
-  const quote = quotes[quoteIndex];
+  const quote = quotes[quoteIndex % quotes.length] ?? { text: "暂无寄语", author: "" };
   const date = now
     ? `${now.getFullYear()}年 ${pad(now.getMonth() + 1)}月 ${pad(now.getDate())}日 星期${"日一二三四五六"[now.getDay()]}`
     : "正在读取本地日期";
@@ -223,7 +226,7 @@ export default function Home({ version }: { version: string }) {
             </span>
           </article>
           <nav className="social-dock" aria-label="社交媒体">
-            {socials.map(({ label, href, icon: Icon }) => (
+            {socials(site.email).map(({ label, href, icon: Icon }) => (
               <a
                 key={label}
                 className="paper-card social-link"
@@ -243,6 +246,7 @@ export default function Home({ version }: { version: string }) {
           <div className="widgets">
             <button
               className="paper-card quote-card"
+              disabled={quotes.length < 2}
               onClick={() => setQuoteIndex((quoteIndex + 1) % quotes.length)}
               aria-label="一言寄语，点击换一句"
             >
@@ -272,7 +276,7 @@ export default function Home({ version }: { version: string }) {
                   className="weather"
                   title="模板天气示例，尚未接入实时天气"
                 >
-                  {site.weather.condition} {site.weather.temperature}°C
+                  {defaults.weather.condition} {defaults.weather.temperature}°C
                 </span>
               </div>
               <time className="digital-clock" dateTime={now?.toISOString()}>
@@ -283,9 +287,9 @@ export default function Home({ version }: { version: string }) {
               <div className="weather-footer" title="模板地点及空气质量示例">
                 <span>
                   <FaLocationDot />
-                  {site.weather.location}
+                  {defaults.weather.location}
                 </span>
-                <span>空气质量 {site.weather.air}</span>
+                <span>空气质量 {defaults.weather.air}</span>
               </div>
             </div>
           </div>
@@ -330,7 +334,7 @@ export default function Home({ version }: { version: string }) {
                 (item) => category === "all" || item.category === category,
               )
               .map((item) => {
-                const Icon = icons[item.id];
+                const Icon = Object.hasOwn(icons, item.id) ? icons[item.id] : FaPaperclip;
                 return (
                   <a
                     className={`paper-card service-tile theme-${item.color}`}

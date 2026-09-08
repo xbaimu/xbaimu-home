@@ -1,7 +1,8 @@
-// 模板内容集中配置；服务地址使用示例公共站点，部署前替换为自己的服务。
+// SQLite 首次初始化的种子数据；已有数据库不会因修改此文件而被覆盖。
+// 天气仍为模板示例，不写入数据库。
 export const site = {
   name: "xbaimu",
-  domain: ".top",
+  domain: ".cn",
   tagline: "静水流深 · 沧笙踏歌",
   email: "contact@xbaimu.cn",
   registration: "豫ICP备2022018134号-1",

@@ -2,8 +2,9 @@
 FROM node:22-alpine AS build
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
+RUN apk add --no-cache python3 make g++
 COPY package.json package-lock.json ./
-RUN --mount=type=cache,target=/root/.npm npm ci
+RUN npm ci
 COPY . .
 RUN npm run build
 
@@ -12,7 +13,8 @@ WORKDIR /app
 ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
     HOSTNAME=0.0.0.0 \
-    PORT=3000
+    PORT=3000 \
+    DATABASE_PATH=/app/data/home.sqlite
 COPY --from=build --chown=node:node /app/.next/standalone ./
 RUN mkdir -p /app/data /app/.next/cache && chown -R node:node /app/data /app/.next/cache
 USER node

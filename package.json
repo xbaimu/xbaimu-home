@@ -5,25 +5,35 @@
   "scripts": {
     "dev": "next dev --hostname 0.0.0.0",
     "build": "next build && node scripts/prepare-standalone.mjs",
-    "start": "HOSTNAME=0.0.0.0 node .next/standalone/server.js",
+    "start": "DATABASE_PATH=${DATABASE_PATH:-$PWD/data/home.sqlite} HOSTNAME=0.0.0.0 node --env-file-if-exists=.env .next/standalone/server.js",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "node --conditions=react-server --import tsx --test tests/*.test.ts",
+    "setup": "node scripts/init-env.mjs",
+    "test:e2e": "npm run build && playwright test"
   },
   "dependencies": {
+    "@fontsource/comfortaa": "^5.2.0",
+    "@fontsource/inter": "^5.2.0",
+    "@fontsource/jetbrains-mono": "^5.2.0",
+    "better-sqlite3": "^12.11.1",
+    "jose": "^6.2.12",
     "next": "^16.0.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-icons": "^5.5.0",
-    "@fontsource/comfortaa": "^5.2.0",
-    "@fontsource/jetbrains-mono": "^5.2.0",
-    "@fontsource/inter": "^5.2.0"
+    "server-only": "^0.0.1",
+    "zod": "^4.5.4"
   },
   "devDependencies": {
-    "typescript": "^5.9.0",
+    "@playwright/test": "^1.63.0",
+    "@types/better-sqlite3": "^9.6.0",
     "@types/node": "^22.0.0",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "eslint": "^9.0.0",
-    "eslint-config-next": "^16.0.0"
+    "eslint-config-next": "^16.0.0",
+    "tsx": "^4.23.13",
+    "typescript": "^5.9.0"
   }
 }
