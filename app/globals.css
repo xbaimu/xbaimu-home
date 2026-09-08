@@ -46,7 +46,6 @@ h1, h2, p { margin: 0; }
 .quote-close { bottom: 4px; right: 15px; }
 .note-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .note-heading h2 { font: 600 18px/1.5 var(--font-mono); letter-spacing: -.04em; }
-.version { font: 400 11px/1.6 var(--font-mono); background: #ecfdf5; color: #047857; border: 1px solid #a7f3d099; padding: 2px 8px; border-radius: var(--radius-sm); white-space: nowrap; }
 .note-card p { margin-top: 10px; color: var(--text-secondary); line-height: 1.7; }
 .note-footer { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #0000000a; padding-top: 12px; margin-top: 14px; font-size: 12px; color: var(--text-muted); gap: 8px; }
 .note-footer > span:last-child { color: var(--text-tertiary); font-size: 11px; white-space: nowrap; }
@@ -104,6 +103,7 @@ h1, h2, p { margin: 0; }
 .footer { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; column-gap: 12px; row-gap: 4px; padding: 20px 24px; font-size: 12px; color: var(--text-muted); }
 .footer svg { color: var(--accent-rose); font-size: 10px; vertical-align: middle; }
 .footer a:hover { color: var(--text-primary); }
+.site-version { margin-left: 8px; white-space: nowrap; font: 400 11px/1.6 var(--font-mono); color: var(--text-tertiary); }
 .footer-divider { color: var(--text-tertiary); }
 .system-status { display: inline-flex; align-items: center; gap: 6px; }
 .system-status .status-dot { width: 6px; height: 6px; }

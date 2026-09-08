@@ -23,3 +23,5 @@ npm run build
 - `docs/DESIGN.md`、`docs/stitch_minimalist_personal_homepage/`：原始设计参考。
 
 时间使用访问者的本地时区；天气、地点、空气质量和运行率为模板静态示例。服务链接使用模板或公共站点示例，品牌与备案信息也沿用模板，发布前请替换为自己的配置。氛围音为点击后播放的本地合成和弦。
+
+页脚 Copyright 同行、作者名后的版本号由 `app/page.tsx` 从 `package.json` 读取，在 `npm run build` 静态生成时写入页面。只需修改 `package.json` 的 `version` 并重新构建；线上运行时不再读取版本文件。

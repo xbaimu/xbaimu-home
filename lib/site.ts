@@ -3,7 +3,6 @@ export const site = {
   name: "imsyy",
   domain: ".top",
   tagline: "静水流深 · 沧笙踏歌",
-  version: "v3.4.0",
   email: "contact@imsyy.top",
   registration: "豫ICP备2022018134号-1",
   weather: {

@@ -16,7 +16,7 @@ const socials = [
 ];
 const pad = (n: number) => String(n).padStart(2, '0');
 
-export default function Home() {
+export default function Home({ version }: { version: string }) {
   const [now, setNow] = useState<Date | null>(null);
   const [quoteIndex, setQuoteIndex] = useState(0);
   const [category, setCategory] = useState('all');
@@ -111,7 +111,7 @@ export default function Home() {
         </div>
         <article className="paper-card note-card">
           <span className="quote-mark quote-open" aria-hidden="true">“</span>
-          <div className="note-heading"><h2>Hello World!</h2><span className="version">{site.version}</span></div>
+          <div className="note-heading"><h2>Hello World!</h2></div>
           <p>一个建立于 21 世纪的小站，存活于互联网的边缘。</p>
           <div className="note-footer"><span>代码、日常记录与生活偶得</span><span>随遇而安</span></div>
           <span className="quote-mark quote-close" aria-hidden="true">”</span>
@@ -143,7 +143,7 @@ export default function Home() {
       </section>
     </main>
 
-    <footer className="footer"><span>Copyright © 2020 - {now?.getFullYear() ?? 2026} &amp; Made with <FaHeart /> by {site.name}</span><span className="footer-divider">|</span><a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">{site.registration}</a><span className="footer-divider">|</span><span className="system-status" title="模板展示数据，尚未接入运行监控"><span className="status-dot" />系统运行正常 (99.98%)</span></footer>
+    <footer className="footer"><span>Copyright © 2020 - {now?.getFullYear() ?? 2026} &amp; Made with <FaHeart /> by {site.name} <span className="site-version" aria-label={`网站版本 ${version}`}>{version}</span></span><span className="footer-divider">|</span><a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">{site.registration}</a><span className="footer-divider">|</span><span className="system-status" title="模板展示数据，尚未接入运行监控"><span className="status-dot" />系统运行正常 (99.98%)</span></footer>
     <span role="status" className={notice ? 'notice paper-card' : 'sr-only'}>{notice}</span>
   </div>;
 }
