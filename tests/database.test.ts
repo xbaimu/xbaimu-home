@@ -17,7 +17,7 @@ function fixture() {
 test('初始化四张表、导入种子数据；重开不会覆盖修改或重新填充空列表', () => {
   const f = fixture();
   try {
-    assert.equal(f.db.pragma('user_version', { simple: true }), 5);
+    assert.equal(f.db.pragma('user_version', { simple: true }), 6);
     assert.equal(f.db.pragma('journal_mode', { simple: true }), 'wal');
     assert.deepEqual(f.db.prepare("SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name").all(),
       [{ name: 'quotes' }, { name: 'services' }, { name: 'site_settings' }, { name: 'weather_settings' }]);
@@ -25,6 +25,8 @@ test('初始化四张表、导入种子数据；重开不会覆盖修改或重�
     assert.equal(content.services.length, services.length);
     assert.equal(content.quotes.length, quotes.length);
     content.site.name = '持久化站点';
+    content.site.title = '自定义页面标题';
+    content.site.description = '自定义页面简介';
     content.site.location = '上海市';
     content.site.areacode = '001234';
     content.site.police_registration = '浙公网安备 33010602000000号';
@@ -74,11 +76,11 @@ test('写入失败会回滚整个事务，危险链接被拒绝，站点设置�
 test('拒绝读取更高版本的数据库', () => {
   const f = fixture();
   try {
-    f.db.pragma('user_version = 6');
+    f.db.pragma('user_version = 7');
     f.db.close();
     assert.throws(() => openDatabase(f.path), /高于/);
     const db = new Database(f.path);
-    try { assert.equal(db.pragma('user_version', { simple: true }), 6); } finally { db.close(); }
+    try { assert.equal(db.pragma('user_version', { simple: true }), 7); } finally { db.close(); }
   } finally { f.cleanup(); }
 });
 
@@ -86,7 +88,7 @@ test('拒绝读取更高版本的数据库', () => {
 test('版本 1 自动迁移图标，保留旧内容；选择图标后重开仍然保留', () => {
   const f = fixture();
   try {
-    f.db.exec("ALTER TABLE site_settings DROP COLUMN police_registration; ALTER TABLE site_settings DROP COLUMN location; ALTER TABLE site_settings DROP COLUMN areacode; ALTER TABLE services DROP COLUMN icon; PRAGMA user_version = 1;");
+    f.db.exec("ALTER TABLE site_settings DROP COLUMN title; ALTER TABLE site_settings DROP COLUMN description; ALTER TABLE site_settings DROP COLUMN police_registration; ALTER TABLE site_settings DROP COLUMN location; ALTER TABLE site_settings DROP COLUMN areacode; ALTER TABLE services DROP COLUMN icon; PRAGMA user_version = 1;");
     f.db.prepare("UPDATE services SET title = '已修改博客' WHERE id = 'blog'").run();
     f.db.prepare("UPDATE services SET id = 'custom-service' WHERE id = 'cloud'").run();
     f.db.close();
@@ -111,11 +113,11 @@ test('版本 2 自动迁移位置设置，保留已有内容并允许清空', ()
   const f = fixture();
   try {
     const original = readContent(f.db);
-    f.db.exec('ALTER TABLE site_settings DROP COLUMN police_registration; ALTER TABLE site_settings DROP COLUMN location; ALTER TABLE site_settings DROP COLUMN areacode; PRAGMA user_version = 2;');
+    f.db.exec('ALTER TABLE site_settings DROP COLUMN title; ALTER TABLE site_settings DROP COLUMN description; ALTER TABLE site_settings DROP COLUMN police_registration; ALTER TABLE site_settings DROP COLUMN location; ALTER TABLE site_settings DROP COLUMN areacode; PRAGMA user_version = 2;');
     f.db.close();
     const migrated = openDatabase(f.path);
     try {
-      assert.equal(migrated.pragma('user_version', { simple: true }), 5);
+      assert.equal(migrated.pragma('user_version', { simple: true }), 6);
       assert.deepEqual(readContent(migrated), original);
       const content = readContent(migrated);
       content.site.location = '';
@@ -132,11 +134,32 @@ test('版本 3 自动添加公安备案，保留站点设置', () => {
     const original = readContent(f.db);
     original.site.location = '上海市';
     writeContent(f.db, original);
-    f.db.exec('ALTER TABLE site_settings DROP COLUMN police_registration; PRAGMA user_version = 3;');
+    f.db.exec('ALTER TABLE site_settings DROP COLUMN title; ALTER TABLE site_settings DROP COLUMN description; ALTER TABLE site_settings DROP COLUMN police_registration; PRAGMA user_version = 3;');
     f.db.close();
     const migrated = openDatabase(f.path);
     try {
-      assert.equal(migrated.pragma('user_version', { simple: true }), 5);
+      assert.equal(migrated.pragma('user_version', { simple: true }), 6);
+      assert.deepEqual(readContent(migrated), original);
+    } finally { migrated.close(); }
+  } finally { f.cleanup(); }
+});
+
+
+test('版本 5 迁移页面元信息保留原默认文案及已有内容，描述可清空', () => {
+  const f = fixture();
+  try {
+    const original = readContent(f.db);
+    original.site.name = '已有站点';
+    writeContent(f.db, original);
+    f.db.exec('ALTER TABLE site_settings DROP COLUMN title; ALTER TABLE site_settings DROP COLUMN description; PRAGMA user_version = 5;');
+    f.db.close();
+    const migrated = openDatabase(f.path);
+    try {
+      assert.equal(migrated.pragma('user_version', { simple: true }), 6);
+      assert.deepEqual(readContent(migrated), original);
+      original.site.title = '修改后的标题';
+      original.site.description = '';
+      writeContent(migrated, original);
       assert.deepEqual(readContent(migrated), original);
     } finally { migrated.close(); }
   } finally { f.cleanup(); }

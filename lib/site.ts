@@ -1,5 +1,7 @@
 // SQLite 首次初始化的种子数据；已有数据库不会因修改此文件而被覆盖。
 export const site = {
+  title: "xbaimu - 个人主页与起始页",
+  description: "静水流深 · 沧笙踏歌。代码、日常记录与生活偶得，一个独立探索与随想的起始页。",
   name: "xbaimu",
   domain: ".cn",
   tagline: "静水流深 · 沧笙踏歌",

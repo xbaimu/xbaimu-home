@@ -1,6 +1,8 @@
 import type { ServiceIconName } from './service-icons';
 
 export interface SiteSettings {
+  title: string;
+  description: string;
   name: string;
   domain: string;
   tagline: string;

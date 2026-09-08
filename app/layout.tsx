@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { connection } from "next/server";
+import { getHomeContent } from "@/lib/server/home-content";
 import "@fontsource/inter/400.css";
 import "@fontsource/inter/500.css";
 import "@fontsource/comfortaa/700.css";
@@ -6,11 +8,11 @@ import "@fontsource/jetbrains-mono/400.css";
 import "@fontsource/jetbrains-mono/600.css";
 import "./globals.css";
 
-export const metadata: Metadata = {
-  title: "xbaimu - 个人主页与起始页",
-  description:
-    "静水流深 · 沧笙踏歌。代码、日常记录与生活偶得，一个独立探索与随想的起始页。",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  await connection();
+  const { site } = await getHomeContent();
+  return { title: site.title, description: site.description || undefined };
+}
 
 export default function RootLayout({
   children,

@@ -460,6 +460,21 @@ export default function Settings({
                     <span>名字、签名与联系方式</span>
                   </div>
                   <div className="settings-fields">
+                    <Field label="页面标题 title" wide hint="显示在浏览器标签页和搜索结果中。">
+                      <input
+                        value={content.site.title}
+                        maxLength={200}
+                        onChange={(e) => edit({ ...content, site: { ...content.site, title: e.target.value } })}
+                      />
+                    </Field>
+                    <Field label="页面描述 description" wide hint="用于搜索结果中的页面简介，可留空。">
+                      <textarea
+                        rows={3}
+                        value={content.site.description}
+                        maxLength={500}
+                        onChange={(e) => edit({ ...content, site: { ...content.site, description: e.target.value } })}
+                      />
+                    </Field>
                     <Field label="站点名称" hint="显示在首页最醒目的位置。">
                       <input
                         value={content.site.name}

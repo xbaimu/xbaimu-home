@@ -54,6 +54,8 @@ test("设置页登录、编辑、保存、缓存更新、过期续登与退出",
   } }));
   // 先读取首页缓存，再通过设置页保存，验证缓存确实失效。
   await page.request.get("/");
+  await page.getByLabel("页面标题 title").fill("我的主页 · 标题验证");
+  await page.getByLabel("页面描述 description").fill("记录日常与灵感的个人主页。");
   await page.getByLabel("站点名称").fill("小站表单验证");
   await page.getByLabel("公安备案信息").fill("浙公网安备 33010602000000号");
   await page.getByLabel("位置名称").fill("上海市 · 徐汇区");
@@ -78,12 +80,16 @@ test("设置页登录、编辑、保存、缓存更新、过期续登与退出",
 
 
   await page.reload();
+  await expect(page.getByLabel("页面标题 title")).toHaveValue("我的主页 · 标题验证");
+  await expect(page.getByLabel("页面描述 description")).toHaveValue("记录日常与灵感的个人主页。");
   await expect(page.getByLabel("公安备案信息")).toHaveValue("浙公网安备 33010602000000号");
   await expect(page.getByLabel("和风天气私钥")).toHaveValue("");
   await expect(page.getByLabel("位置名称")).toHaveValue("上海市 · 徐汇区");
   await expect(page.getByLabel("地区 areacode")).toHaveValue("001234");
   const locationPage = await context.newPage();
   await locationPage.goto("/");
+  await expect(locationPage).toHaveTitle("我的主页 · 标题验证");
+  await expect(locationPage.locator('meta[name="description"]')).toHaveAttribute("content", "记录日常与灵感的个人主页。");
   await expect(locationPage.locator(".weather-footer")).toContainText("上海市 · 徐汇区");
   await expect(locationPage.locator(".weather")).toHaveText("少云 24°C");
   await expect(locationPage.locator(".weather-footer")).toContainText("湿度 69%");

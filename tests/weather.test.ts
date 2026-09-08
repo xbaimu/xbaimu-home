@@ -72,9 +72,9 @@ test('版本 4 升级新增天气配置，保留已有站点内容', () => {
   let db = openDatabase(path);
   try {
     const content = readContent(db); content.site.name = '旧站点'; writeContent(db, content);
-    db.exec('DROP TABLE weather_settings; PRAGMA user_version = 4;');
+    db.exec('DROP TABLE weather_settings; ALTER TABLE site_settings DROP COLUMN title; ALTER TABLE site_settings DROP COLUMN description; PRAGMA user_version = 4;');
     db.close(); db = openDatabase(path);
-    assert.equal(db.pragma('user_version', { simple: true }), 5);
+    assert.equal(db.pragma('user_version', { simple: true }), 6);
     assert.deepEqual(readContent(db), content);
     assert.equal(readAdminContent(db).weather.hasPrivateKey, false);
   } finally { db.close(); rmSync(directory, { recursive: true, force: true }); }

@@ -6,7 +6,7 @@ import { site, services, quotes } from '../site';
 import type { AdminContent, HomeContent, Quote, Service, SiteSettings, WeatherSettings } from '../site-types';
 import { validateWeatherSettings } from './weather-auth';
 
-const schemaVersion = 5;
+const schemaVersion = 6;
 
 // 懒初始化：构建不打开数据库。全局连接也可跨开发环境热更新复用。
 const globalDatabase = globalThis as typeof globalThis & {
@@ -45,6 +45,8 @@ export function openDatabase(path: string): Database.Database {
         db.exec(`
           CREATE TABLE site_settings (
             id INTEGER PRIMARY KEY CHECK (id = 1),
+            title TEXT NOT NULL DEFAULT '',
+            description TEXT NOT NULL DEFAULT '',
             name TEXT NOT NULL,
             domain TEXT NOT NULL DEFAULT '',
             tagline TEXT NOT NULL DEFAULT '',
@@ -101,6 +103,12 @@ export function openDatabase(path: string): Database.Database {
         db.exec("ALTER TABLE site_settings ADD COLUMN police_registration TEXT NOT NULL DEFAULT '';");
         db.pragma(`user_version = ${schemaVersion}`);
       }
+      if (version >= 1 && version <= 5) {
+        db.exec(`ALTER TABLE site_settings ADD COLUMN title TEXT NOT NULL DEFAULT '';
+          ALTER TABLE site_settings ADD COLUMN description TEXT NOT NULL DEFAULT '';`);
+        db.prepare('UPDATE site_settings SET title = ?, description = ? WHERE id = 1')
+          .run(site.title, site.description);
+      }
       db.pragma(`user_version = ${schemaVersion}`);
     }).immediate();
     return db;
@@ -126,7 +134,7 @@ type QuoteRow = Omit<Quote, 'enabled'> & { enabled: number };
 
 export function readContent(db: Database.Database, publicOnly = false): HomeContent {
   return db.transaction(() => {
-    const site = db.prepare(`SELECT name, domain, tagline, email, registration, police_registration, location, areacode
+    const site = db.prepare(`SELECT title, description, name, domain, tagline, email, registration, police_registration, location, areacode
       FROM site_settings WHERE id = 1`).get() as SiteSettings | undefined;
     if (!site) throw new Error('缺少站点设置');
     const filter = publicOnly ? 'WHERE enabled = 1' : '';
@@ -156,9 +164,9 @@ export function writeContent(db: Database.Database, content: HomeContent & { wea
       db.prepare(`UPDATE weather_settings SET apiHost = @apiHost, projectId = @projectId, developerId = @developerId,
         credentialId = @credentialId, privateKey = @privateKey WHERE id = 1`).run(weather);
     }
-    db.prepare(`INSERT INTO site_settings (id, name, domain, tagline, email, registration, police_registration, location, areacode)
-      VALUES (1, @name, @domain, @tagline, @email, @registration, @police_registration, @location, @areacode)
-      ON CONFLICT(id) DO UPDATE SET name = excluded.name, domain = excluded.domain,
+    db.prepare(`INSERT INTO site_settings (id, title, description, name, domain, tagline, email, registration, police_registration, location, areacode)
+      VALUES (1, @title, @description, @name, @domain, @tagline, @email, @registration, @police_registration, @location, @areacode)
+      ON CONFLICT(id) DO UPDATE SET title = excluded.title, description = excluded.description, name = excluded.name, domain = excluded.domain,
       tagline = excluded.tagline, email = excluded.email,
       registration = excluded.registration, police_registration = excluded.police_registration, location = excluded.location,
       areacode = excluded.areacode, updated_at = CURRENT_TIMESTAMP`).run(content.site);

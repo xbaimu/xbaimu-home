@@ -138,6 +138,10 @@ test("校验完整设置：非法 URL、重复 ID、布尔值类型和过长输�
     }).success,
     false,
   );
+  for (const patch of [{ title: " " }, { title: "x".repeat(201) }, { description: "x".repeat(501) }]) {
+    assert.equal(homeContentSchema.safeParse({ ...content, site: { ...settings, ...patch } }).success, false);
+  }
+  assert.equal(homeContentSchema.safeParse({ ...content, site: { ...settings, description: "" } }).success, true);
   assert.equal(
     homeContentSchema.safeParse({ ...content, services: [], quotes: [] })
       .success,

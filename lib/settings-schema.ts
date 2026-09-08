@@ -35,6 +35,8 @@ export const homeContentSchema = z
     weather: weatherSettingsSchema.optional(),
     site: z
       .object({
+        title: shortText(200).min(1, "请填写页面标题"),
+        description: shortText(500),
         name: title,
         domain: shortText(100),
         tagline: shortText(200),
