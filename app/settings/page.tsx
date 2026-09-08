@@ -6,7 +6,7 @@ import {
   sessionCookie,
   verifySession,
 } from "@/lib/server/auth";
-import { getDatabase, readContent } from "@/lib/server/database";
+import { getDatabase, readAdminContent } from "@/lib/server/database";
 import "./settings.css";
 
 export const metadata: Metadata = {
@@ -19,6 +19,6 @@ export default async function SettingsPage() {
   const authenticated = await verifySession(
     (await cookies()).get(sessionCookie)?.value,
   );
-  const content = authenticated ? readContent(getDatabase()) : null;
+  const content = authenticated ? readAdminContent(getDatabase()) : null;
   return <Settings initialContent={content} configured={authConfigured()} />;
 }

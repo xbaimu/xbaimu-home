@@ -17,8 +17,22 @@ const httpUrl = shortText(2048).refine((value) => {
 }, "请填写有效的 HTTP 或 HTTPS 链接");
 const order = z.number().int().min(0).max(1000);
 
+export const weatherSettingsSchema = z.object({
+  apiHost: shortText(253).refine(
+    (value) => value === "" || /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)?\.qweatherapi\.com$/i.test(value),
+    "请填写和风天气控制台的 API Host（仅域名，例如 abc.re.qweatherapi.com）",
+  ),
+  projectId: shortText(100),
+  developerId: shortText(100),
+  credentialId: shortText(100),
+  privateKey: shortText(4096).optional(),
+  hasPrivateKey: z.boolean().optional(),
+  clearPrivateKey: z.boolean().optional(),
+}).strict();
+
 export const homeContentSchema = z
   .object({
+    weather: weatherSettingsSchema.optional(),
     site: z
       .object({
         name: title,

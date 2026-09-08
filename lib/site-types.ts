@@ -36,3 +36,21 @@ export interface HomeContent {
   services: Service[];
   quotes: Quote[];
 }
+
+export interface WeatherSettings {
+  apiHost: string;
+  projectId: string;
+  developerId: string;
+  credentialId: string;
+  privateKey?: string;
+  hasPrivateKey?: boolean;
+  clearPrivateKey?: boolean;
+}
+
+export interface AdminContent extends HomeContent {
+  weather: WeatherSettings;
+}
+
+export type WeatherResult =
+  | { status: 'unconfigured' | 'unavailable' }
+  | { status: 'ok'; condition: string; temperature: string; humidity: string; fetchedAt: string };

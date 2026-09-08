@@ -27,7 +27,7 @@ import {
   FaRightFromBracket,
   FaFloppyDisk,
 } from "react-icons/fa6";
-import type { HomeContent, Service, Quote } from "@/lib/site-types";
+import type { AdminContent, Service, Quote } from "@/lib/site-types";
 import ServiceIcon from "@/components/service-icon";
 import { serviceIconNames, serviceIconLabels } from "@/lib/service-icons";
 import { homeContentSchema } from "@/lib/settings-schema";
@@ -111,7 +111,7 @@ export default function Settings({
   initialContent,
   configured,
 }: {
-  initialContent: HomeContent | null;
+  initialContent: AdminContent | null;
   configured: boolean;
 }) {
   const [content, setContent] = useState(initialContent);
@@ -140,7 +140,7 @@ export default function Settings({
     return () => window.removeEventListener("beforeunload", warn);
   }, [dirty]);
 
-  function edit(next: HomeContent) {
+  function edit(next: AdminContent) {
     setContent(next);
     setMessage("");
   }
@@ -181,7 +181,7 @@ export default function Settings({
     try {
       await api("login", "POST", { key });
       // Cookie 是否成功保存也由读取接口验证，避免 HTTP 下 Secure Cookie 丢失后误报登录成功。
-      const latest = await api<HomeContent>("settings");
+      const latest = await api<AdminContent>("settings");
       if (!content) {
         setContent(latest);
         setSaved(latest);
@@ -213,7 +213,7 @@ export default function Settings({
     });
     if (!result.success) {
       const issue = result.error.issues[0];
-      setTab(issue.path[0] as Tab);
+      setTab(issue.path[0] === "weather" ? "site" : issue.path[0] as Tab);
       setMessage(issue.message);
       setIsError(true);
       return;
@@ -221,7 +221,7 @@ export default function Settings({
     setBusy(true);
     setMessage("");
     try {
-      const response = await api<{ content: HomeContent }>(
+      const response = await api<{ content: AdminContent }>(
         "settings",
         "PUT",
         result.data,
@@ -453,124 +453,164 @@ export default function Settings({
           </div>
           <fieldset className="settings-editor" disabled={busy}>
             {tab === "site" && (
-              <section className="settings-card paper-card">
-                <div className="settings-card-heading">
-                  <h3>关于小站</h3>
-                  <span>名字、签名与联系方式</span>
-                </div>
-                <div className="settings-fields">
-                  <Field label="站点名称" hint="显示在首页最醒目的位置。">
-                    <input
-                      value={content.site.name}
-                      maxLength={80}
-                      placeholder="例如 xbaimu"
-                      onChange={(e) =>
-                        edit({
-                          ...content,
-                          site: { ...content.site, name: e.target.value },
-                        })
-                      }
-                    />
-                  </Field>
-                  <Field label="域名后缀">
-                    <input
-                      value={content.site.domain}
-                      maxLength={100}
-                      placeholder=".top"
-                      onChange={(e) =>
-                        edit({
-                          ...content,
-                          site: { ...content.site, domain: e.target.value },
-                        })
-                      }
-                    />
-                  </Field>
-                  <Field label="个性签名" wide hint="一句话，表达此刻的你。">
-                    <textarea
-                      rows={3}
-                      value={content.site.tagline}
-                      maxLength={200}
-                      placeholder="静水流深 · 沧笙踏歌"
-                      onChange={(e) =>
-                        edit({
-                          ...content,
-                          site: { ...content.site, tagline: e.target.value },
-                        })
-                      }
-                    />
-                  </Field>
-                  <Field label="位置名称" hint="显示在首页时钟下方，可留空。">
-                    <input
-                      value={content.site.location}
-                      maxLength={100}
-                      placeholder="例如：杭州市 · 西湖区"
-                      onChange={(e) =>
-                        edit({
-                          ...content,
-                          site: { ...content.site, location: e.target.value },
-                        })
-                      }
-                    />
-                  </Field>
-                  <Field label="地区 areacode" hint="填写天气服务对应的地区编码，可留空。">
-                    <input
-                      type="text"
-                      value={content.site.areacode}
-                      maxLength={64}
-                      placeholder="填写所用天气服务的地区编码"
-                      onChange={(e) =>
-                        edit({
-                          ...content,
-                          site: { ...content.site, areacode: e.target.value },
-                        })
-                      }
-                    />
-                  </Field>
-                  <Field label="联系邮箱" wide>
-                    <input
-                      type="email"
-                      value={content.site.email}
-                      maxLength={254}
-                      placeholder="hello@example.com"
-                      onChange={(e) =>
-                        edit({
-                          ...content,
-                          site: { ...content.site, email: e.target.value },
-                        })
-                      }
-                    />
-                  </Field>
-                  <Field label="备案信息">
-                    <input
-                      value={content.site.registration}
-                      maxLength={100}
-                      placeholder="没有备案可留空"
-                      onChange={(e) =>
-                        edit({
-                          ...content,
-                          site: {
-                            ...content.site,
-                            registration: e.target.value,
-                          },
-                        })
-                      }
-                    />
-                  </Field>
-                  <Field label="公安备案信息" hint="填写完整公安备案号，留空则不显示。">
-                    <input
-                      value={content.site.police_registration}
-                      maxLength={100}
-                      placeholder="例如：浙公网安备 33010602000000号"
-                      onChange={(e) =>
-                        edit({
-                          ...content,
-                          site: { ...content.site, police_registration: e.target.value },
-                        })
-                      }
-                    />
-                  </Field>
-                </div>
-              </section>
+              <div className="settings-item-list">
+                <section className="settings-card paper-card">
+                  <div className="settings-card-heading">
+                    <h3>关于小站</h3>
+                    <span>名字、签名与联系方式</span>
+                  </div>
+                  <div className="settings-fields">
+                    <Field label="站点名称" hint="显示在首页最醒目的位置。">
+                      <input
+                        value={content.site.name}
+                        maxLength={80}
+                        placeholder="例如 xbaimu"
+                        onChange={(e) =>
+                          edit({
+                            ...content,
+                            site: { ...content.site, name: e.target.value },
+                          })
+                        }
+                      />
+                    </Field>
+                    <Field label="域名后缀">
+                      <input
+                        value={content.site.domain}
+                        maxLength={100}
+                        placeholder=".top"
+                        onChange={(e) =>
+                          edit({
+                            ...content,
+                            site: { ...content.site, domain: e.target.value },
+                          })
+                        }
+                      />
+                    </Field>
+                    <Field label="个性签名" wide hint="一句话，表达此刻的你。">
+                      <textarea
+                        rows={3}
+                        value={content.site.tagline}
+                        maxLength={200}
+                        placeholder="静水流深 · 沧笙踏歌"
+                        onChange={(e) =>
+                          edit({
+                            ...content,
+                            site: { ...content.site, tagline: e.target.value },
+                          })
+                        }
+                      />
+                    </Field>
+                    <Field label="联系邮箱" wide>
+                      <input
+                        type="email"
+                        value={content.site.email}
+                        maxLength={254}
+                        placeholder="hello@example.com"
+                        onChange={(e) =>
+                          edit({
+                            ...content,
+                            site: { ...content.site, email: e.target.value },
+                          })
+                        }
+                      />
+                    </Field>
+                    <Field label="备案信息">
+                      <input
+                        value={content.site.registration}
+                        maxLength={100}
+                        placeholder="没有备案可留空"
+                        onChange={(e) =>
+                          edit({
+                            ...content,
+                            site: {
+                              ...content.site,
+                              registration: e.target.value,
+                            },
+                          })
+                        }
+                      />
+                    </Field>
+                    <Field label="公安备案信息" hint="填写完整公安备案号，留空则不显示。">
+                      <input
+                        value={content.site.police_registration}
+                        maxLength={100}
+                        placeholder="例如：浙公网安备 33010602000000号"
+                        onChange={(e) =>
+                          edit({
+                            ...content,
+                            site: { ...content.site, police_registration: e.target.value },
+                          })
+                        }
+                      />
+                    </Field>
+                  </div>
+                </section>
+                <section className="settings-card paper-card" aria-labelledby="weather-settings-title">
+                  <div className="settings-card-heading">
+                    <h3 id="weather-settings-title">和风天气设置</h3>
+                    <span>城市位置与天气服务配置</span>
+                  </div>
+                  <div className="settings-fields">
+                    <Field label="位置名称" hint="显示在首页时钟下方，可留空。">
+                      <input
+                        value={content.site.location}
+                        maxLength={100}
+                        placeholder="例如：杭州市 · 西湖区"
+                        onChange={(e) =>
+                          edit({
+                            ...content,
+                            site: { ...content.site, location: e.target.value },
+                          })
+                        }
+                      />
+                    </Field>
+                    <Field label="地区 areacode" hint="填写和风天气 Location ID 或经度,纬度；留空停用天气。">
+                      <input
+                        type="text"
+                        value={content.site.areacode}
+                        maxLength={64}
+                        placeholder="例如：101210101 或 120.15,30.28"
+                        onChange={(e) =>
+                          edit({
+                            ...content,
+                            site: { ...content.site, areacode: e.target.value },
+                          })
+                        }
+                      />
+                    </Field>
+                    <Field label="和风天气 API Host" hint="复制和风天气控制台的专属域名，不含 https:// 或路径。">
+                      <input value={content.weather.apiHost} maxLength={253}
+                        placeholder="abc.re.qweatherapi.com"
+                        onChange={(e) => edit({ ...content, weather: { ...content.weather, apiHost: e.target.value } })} />
+                    </Field>
+                    <Field label="和风天气开发者 ID" hint="控制台设置中的开发者 ID，用于 JWT 的 iss。">
+                      <input value={content.weather.developerId} maxLength={100}
+                        onChange={(e) => edit({ ...content, weather: { ...content.weather, developerId: e.target.value } })} />
+                    </Field>
+                    <Field label="和风天气项目 ID" hint="项目管理中的项目 ID，用于 JWT 的 sub。">
+                      <input value={content.weather.projectId} maxLength={100}
+                        onChange={(e) => edit({ ...content, weather: { ...content.weather, projectId: e.target.value } })} />
+                    </Field>
+                    <Field label="和风天气凭据 ID" hint="Ed25519 凭据的 ID，用于 JWT 的 kid。">
+                      <input value={content.weather.credentialId} maxLength={100}
+                        onChange={(e) => edit({ ...content, weather: { ...content.weather, credentialId: e.target.value } })} />
+                    </Field>
+                    <Field label="和风天气私钥" wide
+                      hint={`${content.weather.hasPrivateKey ? "已配置私钥" : "尚未配置私钥"}。保存后不回显，留空保留原私钥；填写新值可替换。请将对应公钥上传至和风天气控制台。`}>
+                      <textarea rows={4} maxLength={4096} autoComplete="off" spellCheck={false}
+                        value={content.weather.privateKey ?? ""}
+                        placeholder="粘贴完整 Ed25519 私钥，包含 BEGIN / END PRIVATE KEY 行"
+                        onChange={(e) => edit({ ...content, weather: { ...content.weather, privateKey: e.target.value, clearPrivateKey: false } })} />
+                    </Field>
+                    {content.weather.hasPrivateKey && (
+                      <Field label="清除已保存的天气私钥" hint="勾选后保存将停用天气认证。">
+                        <input type="checkbox" checked={content.weather.clearPrivateKey ?? false}
+                          onChange={(e) => edit({ ...content, weather: { ...content.weather, clearPrivateKey: e.target.checked, privateKey: "" } })} />
+                      </Field>
+                    )}
+                  </div>
+                </section>
+              </div>
             )}
             {tab === "services" && (
               <div className="settings-item-list">

@@ -87,8 +87,7 @@ test("跨站或无 Origin 的写请求被拒绝，登录限流有时间窗口", 
 });
 
 test("校验完整设置：非法 URL、重复 ID、布尔值类型和过长输入不能保存", () => {
-  const { weather: _weather, ...settings } = site;
-  void _weather;
+  const settings = site;
   const content = {
     site: settings,
     services: services.map((item, i) => ({

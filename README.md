@@ -53,13 +53,13 @@ npm run build
 - `app/tokens.css`：本地颜色、字体、尺寸、间距、圆角、阴影变量。
 - `app/globals.css`：响应式布局与组件样式。
 - `components/home.tsx`：主页组件及交互。
-- `lib/site.ts`：数据库首次初始化的种子数据，以及天气示例。
+- `lib/site.ts`：数据库首次初始化的种子数据。
 - `lib/server/database.ts`：SQLite 连接、版本迁移、事务读写。
 - `lib/server/home-content.ts`：首页数据缓存与保存后失效。
 - `docs/DESIGN-SUMMARY.md`：设计摘要、模板差异与交互说明。
 - `docs/DESIGN.md`、`docs/stitch_minimalist_personal_homepage/`：原始设计参考。
 
-时间使用访问者的本地时区；地点可在后台「站点信息」中填写；天气、空气质量和运行率为模板静态示例。服务链接使用模板或公共站点示例，品牌与备案信息也沿用模板，发布前请替换为自己的配置。氛围音为点击后播放的本地合成和弦。
+时间使用访问者的本地时区；地点可在后台「站点信息」中填写；天气和湿度来自和风天气，运行率为模板静态示例。服务链接使用模板或公共站点示例，品牌与备案信息也沿用模板，发布前请替换为自己的配置。氛围音为点击后播放的本地合成和弦。
 
 页脚 Copyright 同行、作者名后的版本号由 `app/page.tsx` 从 `package.json` 读取，随构建产物写入页面。只需修改 `package.json` 的 `version` 并重新构建；线上运行时不再读取版本文件。
 
@@ -81,7 +81,7 @@ DATABASE_PATH=/absolute/path/home.sqlite npm start
 npm test
 ```
 
-首页改为运行时渲染，SQLite 查询结果通过 Next.js Data Cache 跨请求复用；此阶段缓存的是数据，页面仍在每次请求时渲染。`saveHomeContent()` 用事务整体保存站点设置、服务和寄语，提交成功后立即使数据缓存失效，下一次请求加载新内容，无需重新构建。该函数由通过 JWT 身份验证的服务端设置接口调用，管理页面位于 `/settings`，读取及保存接口均验证管理会话。整体保存必须传入包含隐藏项的完整数据，可通过 `readContent(getDatabase())` 读取；首页读取只返回启用项。位置名称（`site.location`）和地区编码（`site.areacode`）可在后台「站点信息」填写并保存到 SQLite，旧数据库自动迁移。位置名称用于首页展示，留空显示「未设置位置」；areacode 按文本保存（保留前导零），请按后续接入的天气服务填写，当前尚未请求实时天气。天气示例、其他写在组件内的静态文案和社交链接暂不入库。
+首页改为运行时渲染，SQLite 查询结果通过 Next.js Data Cache 跨请求复用；此阶段缓存的是数据，页面仍在每次请求时渲染。`saveHomeContent()` 用事务整体保存站点设置、服务和寄语，提交成功后立即使数据缓存失效，下一次请求加载新内容，无需重新构建。该函数由通过 JWT 身份验证的服务端设置接口调用，管理页面位于 `/settings`，读取及保存接口均验证管理会话。整体保存必须传入包含隐藏项的完整数据，可通过 `readContent(getDatabase())` 读取；首页读取只返回启用项。位置名称（`site.location`）和地区编码（`site.areacode`）可在后台「站点信息」填写并保存到 SQLite，旧数据库自动迁移。位置名称用于首页展示，留空显示「未设置位置」；areacode 按文本保存（保留前导零），支持和风天气 Location ID 或 `经度,纬度`，留空停用天气。其他写在组件内的静态文案和社交链接暂不入库。
 
 直接通过 SQLite 工具修改数据不会触发缓存失效。维护时应停止服务，修改数据库，清除 `.next/standalone/.next/cache`（Docker 中为 `/app/.next/cache`；开发环境为 `.next/cache`）后启动；容器重建会清空缓存 tmpfs 并保留数据卷。备份可在服务停止后复制数据库文件，运行中应使用 SQLite 备份工具，不能只复制主文件而忽略 WAL。此方案面向单实例部署。
 
@@ -118,3 +118,19 @@ npm run test:e2e
 浏览器测试使用独立的测试密钥及 `.next/e2e/home.sqlite`，不会修改 `data/home.sqlite`。覆盖登录、Cookie、编辑保存、首页缓存更新、移动布局、过期续登、退出、伪造令牌及跨站请求拒绝。
 
 服务链接支持从 16 种内置图标中选择，选择后即时预览，保存后显示在首页。数据库版本 2 自动新增 `services.icon`，保留原有服务的图标和内容；自定义服务默认使用链接图标。
+
+
+### 和风天气配置
+
+在后台「站点信息」的地区编码旁填写和风天气 API Host（仅域名）、开发者 ID、项目 ID、凭据 ID 和完整 Ed25519 PEM 私钥。开发者 ID 与 API Host 在和风天气控制台「设置」中查看，项目 ID 和凭据 ID 在「项目管理」中查看。
+
+按[官方认证文档](https://dev.qweather.com/docs/configuration/authentication/#generate-ed25519-key)生成密钥对：
+
+```bash
+openssl genpkey -algorithm ED25519 -out ed25519-private.pem
+openssl pkey -pubout -in ed25519-private.pem -out ed25519-public.pem
+```
+
+将公钥上传到和风天气项目的 JWT 凭据中，将私钥文件的完整内容粘贴到本站后台。保存后输入框清空，仅显示「已配置私钥」；留空保存保留原私钥，填写新值替换，勾选「清除已保存的天气私钥」后保存可删除。管理页面、管理 API 和首页均不返回已保存的私钥。私钥存储在服务端 SQLite 的独立 `weather_settings` 表中，备份也包含私钥，应限制数据库及备份的读取权限。
+
+服务端按官方规则生成 EdDSA JWT（`kid`、`iss`、`sub`、`iat`、`exp`），通过 Bearer 请求[实时天气 v1](https://dev.qweather.com/docs/api/weather/weather-current/)。城市编码先经 GeoAPI 解析为坐标，直接填写 `经度,纬度` 可省去城市查询。首页显示天气、摄氏温度、湿度和来源链接，每 10 分钟刷新；服务端共享缓存 10 分钟并合并并发请求，失败缓存 1 分钟。城市或认证配置修改后，新请求立即使用新配置。未配置时显示「天气未配置」，请求失败时显示「天气暂不可用」。数据库版本 5 自动新增天气表并保留旧数据。

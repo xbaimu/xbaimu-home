@@ -6,7 +6,7 @@ import {
   readJson,
   sameOrigin,
 } from "@/lib/server/admin-http";
-import { getDatabase, readContent } from "@/lib/server/database";
+import { getDatabase, readAdminContent } from "@/lib/server/database";
 import { saveHomeContent } from "@/lib/server/home-content";
 import { homeContentSchema } from "@/lib/settings-schema";
 
@@ -15,7 +15,7 @@ export const runtime = "nodejs";
 export async function GET(request: NextRequest) {
   if (!(await authenticated(request))) return json({ error: "请先登录" }, 401);
   try {
-    return json(readContent(getDatabase()));
+    return json(readAdminContent(getDatabase()));
   } catch (error) {
     return handleError(error);
   }
@@ -33,7 +33,7 @@ export async function PUT(request: NextRequest) {
     if (!result.success)
       return json({ error: result.error.issues[0].message }, 400);
     saveHomeContent(result.data);
-    return json({ ok: true, content: readContent(getDatabase()) });
+    return json({ ok: true, content: readAdminContent(getDatabase()) });
   } catch (error) {
     return handleError(error);
   }

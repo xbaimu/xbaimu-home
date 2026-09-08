@@ -3,9 +3,10 @@ import Database from 'better-sqlite3';
 import { mkdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { site, services, quotes } from '../site';
-import type { HomeContent, Quote, Service, SiteSettings } from '../site-types';
+import type { AdminContent, HomeContent, Quote, Service, SiteSettings, WeatherSettings } from '../site-types';
+import { validateWeatherSettings } from './weather-auth';
 
-const schemaVersion = 4;
+const schemaVersion = 5;
 
 // 懒初始化：构建不打开数据库。全局连接也可跨开发环境热更新复用。
 const globalDatabase = globalThis as typeof globalThis & {
@@ -28,6 +29,17 @@ export function openDatabase(path: string): Database.Database {
       const version = db.pragma('user_version', { simple: true }) as number;
       if (version > schemaVersion) {
         throw new Error(`数据库版本 ${version} 高于应用支持的版本 ${schemaVersion}`);
+      }
+      if (version < 5) {
+        db.exec(`CREATE TABLE IF NOT EXISTS weather_settings (
+          id INTEGER PRIMARY KEY CHECK (id = 1),
+          apiHost TEXT NOT NULL DEFAULT '',
+          projectId TEXT NOT NULL DEFAULT '',
+          developerId TEXT NOT NULL DEFAULT '',
+          credentialId TEXT NOT NULL DEFAULT '',
+          privateKey TEXT NOT NULL DEFAULT ''
+        );
+        INSERT OR IGNORE INTO weather_settings (id) VALUES (1);`);
       }
       if (version === 0) {
         db.exec(`
@@ -89,6 +101,7 @@ export function openDatabase(path: string): Database.Database {
         db.exec("ALTER TABLE site_settings ADD COLUMN police_registration TEXT NOT NULL DEFAULT '';");
         db.pragma(`user_version = ${schemaVersion}`);
       }
+      db.pragma(`user_version = ${schemaVersion}`);
     }).immediate();
     return db;
   } catch (error) {
@@ -130,7 +143,7 @@ export function readContent(db: Database.Database, publicOnly = false): HomeCont
 }
 
 // 整体保存，在同一事务内完成；参数绑定避免 SQL 注入。
-export function writeContent(db: Database.Database, content: HomeContent) {
+export function writeContent(db: Database.Database, content: HomeContent & { weather?: WeatherSettings }) {
   for (const service of content.services) {
     const url = new URL(service.href);
     if (!['https:', 'http:'].includes(url.protocol)) {
@@ -138,6 +151,11 @@ export function writeContent(db: Database.Database, content: HomeContent) {
     }
   }
   db.transaction(() => {
+    if (content.weather) {
+      const weather = validateWeatherSettings(content.weather, readWeatherSettings(db));
+      db.prepare(`UPDATE weather_settings SET apiHost = @apiHost, projectId = @projectId, developerId = @developerId,
+        credentialId = @credentialId, privateKey = @privateKey WHERE id = 1`).run(weather);
+    }
     db.prepare(`INSERT INTO site_settings (id, name, domain, tagline, email, registration, police_registration, location, areacode)
       VALUES (1, @name, @domain, @tagline, @email, @registration, @police_registration, @location, @areacode)
       ON CONFLICT(id) DO UPDATE SET name = excluded.name, domain = excluded.domain,
@@ -152,5 +170,18 @@ export function writeContent(db: Database.Database, content: HomeContent) {
     const insertQuote = db.prepare(`INSERT INTO quotes (id, text, author, sort_order, enabled)
       VALUES (@id, @text, @author, @sort_order, @enabled)`);
     for (const item of content.quotes) insertQuote.run({ ...item, enabled: item.enabled ? 1 : 0 });
+  })();
+}
+
+// 仅服务端签名读取私钥；管理接口和页面使用下面的脱敏读取。
+export function readWeatherSettings(db: Database.Database): WeatherSettings & { privateKey: string } {
+  return db.prepare('SELECT apiHost, projectId, developerId, credentialId, privateKey FROM weather_settings WHERE id = 1')
+    .get() as WeatherSettings & { privateKey: string };
+}
+
+export function readAdminContent(db: Database.Database): AdminContent {
+  return db.transaction(() => {
+    const { privateKey, ...weather } = readWeatherSettings(db);
+    return { ...readContent(db), weather: { ...weather, hasPrivateKey: Boolean(privateKey) } };
   })();
 }

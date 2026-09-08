@@ -1,5 +1,4 @@
 // SQLite 首次初始化的种子数据；已有数据库不会因修改此文件而被覆盖。
-// 天气仍为模板示例，不写入数据库。
 export const site = {
   name: "xbaimu",
   domain: ".cn",
@@ -9,11 +8,6 @@ export const site = {
   police_registration: "",
   location: "杭州市 · 西湖区",
   areacode: "",
-  weather: {
-    condition: "晴",
-    temperature: 24,
-    air: "优 28",
-  },
 };
 export const services = [
   {

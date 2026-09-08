@@ -20,8 +20,7 @@ import {
   FaAngleRight,
   FaHeart,
 } from "react-icons/fa6";
-import { site as defaults } from "@/lib/site";
-import type { HomeContent } from "@/lib/site-types";
+import type { HomeContent, WeatherResult } from "@/lib/site-types";
 import ServiceIcon from "@/components/service-icon";
 
 const categories = [
@@ -54,8 +53,26 @@ export default function Home({
   const [fullscreen, setFullscreen] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [notice, setNotice] = useState("");
+  const [weather, setWeather] = useState<WeatherResult | null>(null);
   const audio = useRef<AudioContext | null>(null);
   const menu = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const update = async () => {
+      try {
+        const response = await fetch('/api/weather', { cache: 'no-store', signal: controller.signal });
+        if (!response.ok) throw new Error();
+        const result: WeatherResult = await response.json();
+        if (!controller.signal.aborted) setWeather(result);
+      } catch {
+        if (!controller.signal.aborted) setWeather({ status: 'unavailable' });
+      }
+    };
+    void update();
+    const timer = window.setInterval(update, 600_000);
+    return () => { controller.abort(); window.clearInterval(timer); };
+  }, [site.areacode]);
 
   useEffect(() => {
     const update = () => setNow(new Date());
@@ -271,9 +288,13 @@ export default function Home({
                 <span className="date">{date}</span>
                 <span
                   className="weather"
-                  title="模板天气示例，尚未接入实时天气"
+                  title={weather?.status === 'ok' ? `和风天气 · 获取时间 ${new Date(weather.fetchedAt).toLocaleString()}` : undefined}
+                  aria-live="polite"
                 >
-                  {defaults.weather.condition} {defaults.weather.temperature}°C
+                  {weather?.status === 'ok'
+                    ? `${weather.condition} ${weather.temperature}°C`
+                    : weather?.status === 'unconfigured' ? '天气未配置'
+                      : weather?.status === 'unavailable' ? '天气暂不可用' : '天气加载中'}
                 </span>
               </div>
               <time className="digital-clock" dateTime={now?.toISOString()}>
@@ -286,8 +307,9 @@ export default function Home({
                   <FaLocationDot />
                   {site.location || "未设置位置"}
                 </span>
-                <span title="模板空气质量示例，尚未接入实时数据">
-                  空气质量 {defaults.weather.air}
+                <span>
+                  {weather?.status === 'ok' && `湿度 ${weather.humidity}% · `}
+                  <a href="https://www.qweather.com/" target="_blank" rel="noreferrer">和风天气</a>
                 </span>
               </div>
             </div>

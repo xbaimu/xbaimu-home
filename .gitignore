@@ -5,6 +5,7 @@ out/
 .env*
 !.env.example
 .DS_Store
+ed25519-*.pem
 data/
 *.db
 *.db-*

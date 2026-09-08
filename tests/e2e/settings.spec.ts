@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { SignJWT } from "jose";
-import { createHash } from "node:crypto";
+import { createHash, generateKeyPairSync } from "node:crypto";
 
 const origin = "http://127.0.0.1:3191";
 const key = "TestAdminKey1234";
@@ -43,6 +43,15 @@ test("设置页登录、编辑、保存、缓存更新、过期续登与退出",
   );
 
   const initial = await (await page.request.get("/api/admin/settings")).json();
+  const weatherPrivateKey = generateKeyPairSync("ed25519").privateKey.export({ type: "pkcs8", format: "pem" }).toString();
+  await page.getByLabel("和风天气 API Host").fill("test.xy.qweatherapi.com");
+  await page.getByLabel("和风天气开发者 ID").fill("Q12345ABCD");
+  await page.getByLabel("和风天气项目 ID").fill("PROJECT123");
+  await page.getByLabel("和风天气凭据 ID").fill("CREDENTIAL123");
+  await page.getByLabel("和风天气私钥").fill(weatherPrivateKey);
+  await context.route("**/api/weather", (route) => route.fulfill({ json: {
+    status: "ok", condition: "少云", temperature: "24", humidity: "69", fetchedAt: "2026-09-08T12:00:00Z",
+  } }));
   // 先读取首页缓存，再通过设置页保存，验证缓存确实失效。
   await page.request.get("/");
   await page.getByLabel("站点名称").fill("小站表单验证");
@@ -59,14 +68,25 @@ test("设置页登录、编辑、保存、缓存更新、过期续登与退出",
     "已保存，首页内容已更新",
   );
   expect(await (await page.request.get("/")).text()).toContain("小站表单验证");
+  await expect(page.getByLabel("和风天气私钥")).toHaveValue("");
+  await expect(page.getByText(/已配置私钥。保存后不回显/)).toBeVisible();
+  const weatherSettings = await (await page.request.get("/api/admin/settings")).json();
+  expect(weatherSettings.weather.hasPrivateKey).toBe(true);
+  expect(weatherSettings.weather).not.toHaveProperty("privateKey");
+  expect(await (await page.request.get("/settings")).text()).not.toContain("-----BEGIN PRIVATE KEY-----");
+  expect(await (await page.request.get("/")).text()).not.toContain("CREDENTIAL123");
+
 
   await page.reload();
   await expect(page.getByLabel("公安备案信息")).toHaveValue("浙公网安备 33010602000000号");
+  await expect(page.getByLabel("和风天气私钥")).toHaveValue("");
   await expect(page.getByLabel("位置名称")).toHaveValue("上海市 · 徐汇区");
   await expect(page.getByLabel("地区 areacode")).toHaveValue("001234");
   const locationPage = await context.newPage();
   await locationPage.goto("/");
   await expect(locationPage.locator(".weather-footer")).toContainText("上海市 · 徐汇区");
+  await expect(locationPage.locator(".weather")).toHaveText("少云 24°C");
+  await expect(locationPage.locator(".weather-footer")).toContainText("湿度 69%");
   const policeLink = locationPage.getByRole("link", { name: "浙公网安备 33010602000000号" });
   await expect(policeLink).toHaveAttribute("href", "https://beian.mps.gov.cn/#/query/webSearch?code=33010602000000");
   await expect(policeLink.locator("img")).toHaveAttribute("src", "/images/ga_icon.png");
@@ -81,6 +101,8 @@ test("设置页登录、编辑、保存、缓存更新、过期续登与退出",
   await expect(page.getByRole("status")).toContainText("已保存");
   expect(await (await page.request.get("/")).text()).toContain("测试链接");
   const updated = await (await page.request.get('/api/admin/settings')).json();
+  expect(updated.weather.hasPrivateKey).toBe(true);
+  expect(updated.weather).not.toHaveProperty('privateKey');
   expect(updated.services.find((item: { title: string }) => item.title === '测试链接').icon).toBe('game');
   await page.reload();
   await page.getByRole('button', { name: /^服务链接/ }).click();
@@ -165,10 +187,11 @@ test("设置页登录、编辑、保存、缓存更新、过期续登与退出",
     (
       await page.request.put("/api/admin/settings", {
         headers: { Origin: origin },
-        data: initial,
+        data: { ...initial, weather: { ...initial.weather, clearPrivateKey: true } },
       })
     ).status(),
   ).toBe(200);
+  expect((await (await page.request.get("/api/admin/settings")).json()).weather.hasPrivateKey).toBe(false);
 
   await page.getByRole("button", { name: "退出", exact: true }).click();
   await expect(

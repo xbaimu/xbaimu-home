@@ -4,6 +4,7 @@ out
 node_modules
 *.tsbuildinfo
 .env*
+ed25519-*.pem
 docs
 README.md
 npm-debug.log*

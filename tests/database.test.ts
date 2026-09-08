@@ -14,13 +14,13 @@ function fixture() {
   return { path, db, cleanup: () => { if (db.open) db.close(); rmSync(directory, { recursive: true, force: true }); } };
 }
 
-test('初始化三张表、导入种子数据；重开不会覆盖修改或重新填充空列表', () => {
+test('初始化四张表、导入种子数据；重开不会覆盖修改或重新填充空列表', () => {
   const f = fixture();
   try {
-    assert.equal(f.db.pragma('user_version', { simple: true }), 4);
+    assert.equal(f.db.pragma('user_version', { simple: true }), 5);
     assert.equal(f.db.pragma('journal_mode', { simple: true }), 'wal');
     assert.deepEqual(f.db.prepare("SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name").all(),
-      [{ name: 'quotes' }, { name: 'services' }, { name: 'site_settings' }]);
+      [{ name: 'quotes' }, { name: 'services' }, { name: 'site_settings' }, { name: 'weather_settings' }]);
     const content = readContent(f.db);
     assert.equal(content.services.length, services.length);
     assert.equal(content.quotes.length, quotes.length);
@@ -74,11 +74,11 @@ test('写入失败会回滚整个事务，危险链接被拒绝，站点设置�
 test('拒绝读取更高版本的数据库', () => {
   const f = fixture();
   try {
-    f.db.pragma('user_version = 5');
+    f.db.pragma('user_version = 6');
     f.db.close();
     assert.throws(() => openDatabase(f.path), /高于/);
     const db = new Database(f.path);
-    try { assert.equal(db.pragma('user_version', { simple: true }), 5); } finally { db.close(); }
+    try { assert.equal(db.pragma('user_version', { simple: true }), 6); } finally { db.close(); }
   } finally { f.cleanup(); }
 });
 
@@ -115,7 +115,7 @@ test('版本 2 自动迁移位置设置，保留已有内容并允许清空', ()
     f.db.close();
     const migrated = openDatabase(f.path);
     try {
-      assert.equal(migrated.pragma('user_version', { simple: true }), 4);
+      assert.equal(migrated.pragma('user_version', { simple: true }), 5);
       assert.deepEqual(readContent(migrated), original);
       const content = readContent(migrated);
       content.site.location = '';
@@ -136,7 +136,7 @@ test('版本 3 自动添加公安备案，保留站点设置', () => {
     f.db.close();
     const migrated = openDatabase(f.path);
     try {
-      assert.equal(migrated.pragma('user_version', { simple: true }), 4);
+      assert.equal(migrated.pragma('user_version', { simple: true }), 5);
       assert.deepEqual(readContent(migrated), original);
     } finally { migrated.close(); }
   } finally { f.cleanup(); }
