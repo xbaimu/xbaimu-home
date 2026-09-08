@@ -16,6 +16,7 @@ export const site = {
 export const services = [
   {
     id: "blog",
+    icon: "blog",
     title: "博客",
     description: "思考与随笔",
     color: "green",
@@ -24,6 +25,7 @@ export const services = [
   },
   {
     id: "cloud",
+    icon: "cloud",
     title: "网盘",
     description: "私人云存储",
     color: "sky",
@@ -32,6 +34,7 @@ export const services = [
   },
   {
     id: "music",
+    icon: "music",
     title: "音乐",
     description: "在线随心听",
     color: "rose",
@@ -40,6 +43,7 @@ export const services = [
   },
   {
     id: "startpage",
+    icon: "compass",
     title: "起始页",
     description: "极简聚合搜",
     color: "teal",
@@ -48,6 +52,7 @@ export const services = [
   },
   {
     id: "bookmarks",
+    icon: "bookmark",
     title: "网址集",
     description: "常用精选站",
     color: "amber",
@@ -56,6 +61,7 @@ export const services = [
   },
   {
     id: "hot",
+    icon: "fire",
     title: "今日热榜",
     description: "全网实时榜",
     color: "orange",

@@ -1,3 +1,5 @@
+import type { ServiceIconName } from './service-icons';
+
 export interface SiteSettings {
   name: string;
   domain: string;
@@ -11,6 +13,7 @@ export interface Service {
   title: string;
   description: string;
   href: string;
+  icon: ServiceIconName;
   color: string;
   category: 'personal' | 'tools';
   sort_order: number;

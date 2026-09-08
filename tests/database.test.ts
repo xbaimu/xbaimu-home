@@ -17,7 +17,7 @@ function fixture() {
 test('初始化三张表、导入种子数据；重开不会覆盖修改或重新填充空列表', () => {
   const f = fixture();
   try {
-    assert.equal(f.db.pragma('user_version', { simple: true }), 1);
+    assert.equal(f.db.pragma('user_version', { simple: true }), 2);
     assert.equal(f.db.pragma('journal_mode', { simple: true }), 'wal');
     assert.deepEqual(f.db.prepare("SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name").all(),
       [{ name: 'quotes' }, { name: 'services' }, { name: 'site_settings' }]);
@@ -71,10 +71,35 @@ test('写入失败会回滚整个事务，危险链接被拒绝，站点设置�
 test('拒绝读取更高版本的数据库', () => {
   const f = fixture();
   try {
-    f.db.pragma('user_version = 2');
+    f.db.pragma('user_version = 3');
     f.db.close();
     assert.throws(() => openDatabase(f.path), /高于/);
     const db = new Database(f.path);
-    try { assert.equal(db.pragma('user_version', { simple: true }), 2); } finally { db.close(); }
+    try { assert.equal(db.pragma('user_version', { simple: true }), 3); } finally { db.close(); }
+  } finally { f.cleanup(); }
+});
+
+
+test('版本 1 自动迁移图标，保留旧内容；选择图标后重开仍然保留', () => {
+  const f = fixture();
+  try {
+    f.db.exec("ALTER TABLE services DROP COLUMN icon; PRAGMA user_version = 1;");
+    f.db.prepare("UPDATE services SET title = '已修改博客' WHERE id = 'blog'").run();
+    f.db.prepare("UPDATE services SET id = 'custom-service' WHERE id = 'cloud'").run();
+    f.db.close();
+    const migrated = openDatabase(f.path);
+    try {
+      const content = readContent(migrated);
+      const blog = content.services.find((item) => item.id === 'blog')!;
+      assert.equal(blog.title, '已修改博客');
+      assert.equal(blog.icon, 'blog');
+      assert.equal(content.services.find((item) => item.id === 'custom-service')!.icon, 'link');
+      assert.equal(content.services.find((item) => item.id === 'hot')!.icon, 'fire');
+      blog.icon = 'game';
+      writeContent(migrated, content);
+    } finally { migrated.close(); }
+    const reopened = openDatabase(f.path);
+    try { assert.equal(readContent(reopened).services.find((item) => item.id === 'blog')!.icon, 'game'); }
+    finally { reopened.close(); }
   } finally { f.cleanup(); }
 });

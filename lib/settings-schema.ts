@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { serviceIconNames } from "./service-icons";
 
 const shortText = (max: number) => z.string().trim().max(max);
 const title = shortText(80).min(1, "请填写名称");
@@ -48,6 +49,7 @@ export const homeContentSchema = z
             title,
             description: shortText(200),
             href: httpUrl,
+            icon: z.enum(serviceIconNames, { error: "请选择有效的服务图标" }),
             color: z.enum(["green", "sky", "rose", "teal", "amber", "orange"]),
             category: z.enum(["personal", "tools"]),
             sort_order: order,

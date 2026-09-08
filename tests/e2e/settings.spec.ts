@@ -61,9 +61,19 @@ test("设置页登录、编辑、保存、缓存更新、过期续登与退出",
   await page.getByRole("button", { name: /添加服务/ }).click();
   await page.getByLabel("服务名称", { exact: true }).last().fill("测试链接");
   await page.getByLabel("访问链接").last().fill("https://example.com");
+  await page.getByRole("radio", { name: "游戏", exact: true }).last().check();
   await page.getByRole("button", { name: "保存更改" }).click();
   await expect(page.getByRole("status")).toContainText("已保存");
   expect(await (await page.request.get("/")).text()).toContain("测试链接");
+  const updated = await (await page.request.get('/api/admin/settings')).json();
+  expect(updated.services.find((item: { title: string }) => item.title === '测试链接').icon).toBe('game');
+  await page.reload();
+  await page.getByRole('button', { name: /^服务链接/ }).click();
+  await expect(page.getByRole('radio', { name: '游戏', exact: true }).last()).toBeChecked();
+  const homepage = await context.newPage();
+  await homepage.goto('/');
+  await expect(homepage.getByRole('link', { name: '测试链接' }).locator('[data-service-icon=game]')).toHaveCount(1);
+  await homepage.close();
   await page
     .getByLabel(/在首页显示/)
     .last()

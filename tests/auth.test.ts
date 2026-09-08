@@ -104,6 +104,7 @@ test("校验完整设置：非法 URL、重复 ID、布尔值类型和过长输�
     })),
   };
   assert.equal(homeContentSchema.safeParse(content).success, true);
+  assert.equal(homeContentSchema.safeParse({ ...content, services: [{ ...content.services[0], icon: '__proto__' }] }).success, false);
   for (const href of [
     "javascript:alert(1)",
     "data:text/html,test",

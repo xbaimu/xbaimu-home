@@ -5,7 +5,7 @@ import { dirname, resolve } from 'node:path';
 import { site, services, quotes } from '../site';
 import type { HomeContent, Quote, Service, SiteSettings } from '../site-types';
 
-const schemaVersion = 1;
+const schemaVersion = 2;
 
 // 懒初始化：构建不打开数据库。全局连接也可跨开发环境热更新复用。
 const globalDatabase = globalThis as typeof globalThis & {
@@ -45,6 +45,7 @@ export function openDatabase(path: string): Database.Database {
             title TEXT NOT NULL,
             description TEXT NOT NULL DEFAULT '',
             href TEXT NOT NULL,
+            icon TEXT NOT NULL DEFAULT 'link',
             color TEXT NOT NULL DEFAULT 'green',
             category TEXT NOT NULL DEFAULT 'personal'
               CHECK (category IN ('personal', 'tools')),
@@ -66,6 +67,14 @@ export function openDatabase(path: string): Database.Database {
           services: services.map((item, index) => ({ ...item, sort_order: index, enabled: true })),
           quotes: quotes.map((item, index) => ({ ...item, id: index + 1, sort_order: index, enabled: true })),
         });
+        db.pragma(`user_version = ${schemaVersion}`);
+      }
+      if (version === 1) {
+        db.exec(`ALTER TABLE services ADD COLUMN icon TEXT NOT NULL DEFAULT 'link';
+          UPDATE services SET icon = CASE id
+            WHEN 'blog' THEN 'blog' WHEN 'cloud' THEN 'cloud' WHEN 'music' THEN 'music'
+            WHEN 'startpage' THEN 'compass' WHEN 'bookmarks' THEN 'bookmark'
+            WHEN 'hot' THEN 'fire' ELSE 'link' END;`);
         db.pragma(`user_version = ${schemaVersion}`);
       }
     }).immediate();
@@ -96,7 +105,7 @@ export function readContent(db: Database.Database, publicOnly = false): HomeCont
       FROM site_settings WHERE id = 1`).get() as SiteSettings | undefined;
     if (!site) throw new Error('缺少站点设置');
     const filter = publicOnly ? 'WHERE enabled = 1' : '';
-    const services = db.prepare(`SELECT id, title, description, href, color, category,
+    const services = db.prepare(`SELECT id, title, description, href, icon, color, category,
       sort_order, enabled FROM services ${filter} ORDER BY sort_order, id`).all() as ServiceRow[];
     const quotes = db.prepare(`SELECT id, text, author, sort_order, enabled
       FROM quotes ${filter} ORDER BY sort_order, id`).all() as QuoteRow[];
@@ -124,8 +133,8 @@ export function writeContent(db: Database.Database, content: HomeContent) {
       registration = excluded.registration, updated_at = CURRENT_TIMESTAMP`).run(content.site);
     db.exec('DELETE FROM services; DELETE FROM quotes;');
     const insertService = db.prepare(`INSERT INTO services
-      (id, title, description, href, color, category, sort_order, enabled)
-      VALUES (@id, @title, @description, @href, @color, @category, @sort_order, @enabled)`);
+      (id, title, description, href, icon, color, category, sort_order, enabled)
+      VALUES (@id, @title, @description, @href, @icon, @color, @category, @sort_order, @enabled)`);
     for (const item of content.services) insertService.run({ ...item, enabled: item.enabled ? 1 : 0 });
     const insertQuote = db.prepare(`INSERT INTO quotes (id, text, author, sort_order, enabled)
       VALUES (@id, @text, @author, @sort_order, @enabled)`);

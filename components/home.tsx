@@ -17,25 +17,12 @@ import {
   FaLocationDot,
   FaPaperclip,
   FaAngleRight,
-  FaRss,
-  FaCloud,
-  FaCompass,
-  FaBookmark,
-  FaFire,
   FaHeart,
 } from "react-icons/fa6";
 import { site as defaults } from "@/lib/site";
 import type { HomeContent } from "@/lib/site-types";
-import type { IconType } from "react-icons";
+import ServiceIcon from "@/components/service-icon";
 
-const icons: Record<string, IconType> = {
-  blog: FaRss,
-  cloud: FaCloud,
-  music: FaCompactDisc,
-  startpage: FaCompass,
-  bookmarks: FaBookmark,
-  hot: FaFire,
-};
 const categories = [
   { id: "all", label: "全部服务" },
   { id: "personal", label: "生活随笔" },
@@ -334,7 +321,6 @@ export default function Home({ version, content }: { version: string; content: H
                 (item) => category === "all" || item.category === category,
               )
               .map((item) => {
-                const Icon = Object.hasOwn(icons, item.id) ? icons[item.id] : FaPaperclip;
                 return (
                   <a
                     className={`paper-card service-tile theme-${item.color}`}
@@ -344,7 +330,7 @@ export default function Home({ version, content }: { version: string; content: H
                     rel="noopener noreferrer"
                   >
                     <span className="service-icon">
-                      <Icon />
+                      <ServiceIcon name={item.icon} />
                     </span>
                     <span className="service-copy">
                       <span className="service-title">{item.title}</span>

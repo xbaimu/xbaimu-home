@@ -28,6 +28,8 @@ import {
   FaFloppyDisk,
 } from "react-icons/fa6";
 import type { HomeContent, Service, Quote } from "@/lib/site-types";
+import ServiceIcon from "@/components/service-icon";
+import { serviceIconNames, serviceIconLabels } from "@/lib/service-icons";
 import { homeContentSchema } from "@/lib/settings-schema";
 
 type Tab = "site" | "services" | "quotes";
@@ -538,7 +540,7 @@ export default function Settings({
                       <span
                         className={`settings-item-symbol theme-${item.color}`}
                       >
-                        <FaLink />
+                        <ServiceIcon name={item.icon} />
                       </span>
                       <div>
                         <h3>{item.title || "新服务"}</h3>
@@ -640,6 +642,19 @@ export default function Settings({
                         </select>
                       </Field>
                     </div>
+                    <fieldset className={`settings-icon-picker theme-${item.color}`}>
+                      <legend>服务图标</legend>
+                      <div className="settings-icon-options">
+                        {serviceIconNames.map((name) => (
+                          <label key={name} className="settings-icon-option">
+                            <input type="radio" name={`service-icon-${item.id}`} value={name}
+                              checked={item.icon === name}
+                              onChange={() => updateService(index, { icon: name })} />
+                            <span><ServiceIcon name={name} /><small>{serviceIconLabels[name]}</small></span>
+                          </label>
+                        ))}
+                      </div>
+                    </fieldset>
                     <label className="settings-switch">
                       <input
                         type="checkbox"
@@ -685,6 +700,7 @@ export default function Settings({
                           description: "",
                           href: "",
                           color: "green",
+                          icon: "link",
                           category: "personal",
                           sort_order: content.services.length,
                           enabled: true,
