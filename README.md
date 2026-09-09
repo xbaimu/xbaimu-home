@@ -1,139 +1,130 @@
 # xbaimu-home
 
-基于 Next.js App Router + TypeScript + 手写 CSS 的纸本风格个人主页。项目直接建立在当前仓库根目录。
-
+纸本风格的个人主页，基于 Next.js、React 和 TypeScript 构建，支持在线管理站点内容和 Docker 部署。
 灵感来源：[imsyy/home](https://github.com/imsyy/home)。
 
+## 功能
+
+- 响应式布局，适配桌面和移动设备。
+- 展示个人信息、服务链接、寄语、本地时间和天气。
+- 内置管理后台，可编辑站点信息、页面标题、备案信息，以及服务链接和寄语。
+- 接入和风天气，支持城市编码或经纬度定位。
+- 使用 SQLite 保存配置，无需额外部署数据库。
+
+## 快速开始
+
+需要 Node.js 22。
+
 ```bash
-npm install
+git clone https://github.com/JayXGuan/xbaimu-home.git
+cd xbaimu-home
+npm ci
 npm run setup
 npm run dev
 ```
 
-访问 http://localhost:3000 。生产运行：`npm run build` 后执行 `npm start`。
+打开 <http://localhost:3000>。访问 `/settings`，使用 `.env` 中的 `ADMIN_KEY` 登录管理后台。站点内容保存后即可生效。
+
+生产环境运行：
+
+```bash
+npm run build
+npm start
+```
 
 ## Docker 部署
 
-需要 Docker 和 Docker Compose v2，在仓库根目录运行：
+### 使用发布镜像
+
+准备 `.env` 文件，可通过 `npm run setup` 自动生成，或参考 [.env.example](.env.example) 填写管理密钥。
+
+```bash
+docker run -d \
+  --name xbaimu-home \
+  --restart unless-stopped \
+  -p 3000:3000 \
+  --env-file .env \
+  -v xbaimu-home-data:/app/data \
+  ghcr.io/jayxguan/xbaimu-home:latest
+```
+
+镜像支持 `linux/amd64`，可选择以下标签：
+
+| 标签 | 用途 |
+| --- | --- |
+| `latest` | 最近发布的正式版 |
+| `v1.0.0` 等版本号 | 指定正式版本 |
+| `test` | 最近发布的测试版 |
+
+### 使用 Docker Compose 构建
+
+克隆仓库并准备 `.env` 后运行：
 
 ```bash
 docker compose up -d --build
-docker compose ps
 ```
 
-访问 http://localhost:3000 。自定义端口：`PORT=8088 docker compose up -d --build`。
-停止并移除容器：`docker compose down`。修改内容或版本号后重新执行带 `--build` 的启动命令。
+默认端口为 `3000`，可通过 `PORT=8088 docker compose up -d --build` 修改。更新源码后，重新执行构建命令即可。
 
-也可以直接构建、运行镜像：
+数据保存在 Docker 命名卷中，停止服务使用 `docker compose down`；加上 `-v` 会同时删除数据卷。
 
-```bash
-docker build -t xbaimu-home:local .
-docker run -d --name xbaimu-home -p 3000:3000 --memory=256m \
-  -v xbaimu-home-data:/app/data \
-  --read-only --tmpfs /tmp:size=16m,mode=1777 \
-  --tmpfs /app/.next/cache:size=32m,uid=1000,gid=1000,mode=0700 xbaimu-home:local
-```
+## 配置
 
-Docker 使用 Node.js 22 Alpine 多阶段构建，启用 Next.js `output: 'standalone'`。运行镜像只复制 standalone 产物（包含追踪到的必要依赖、静态资源及可选的 `public/`），以非 root 用户直接执行 `node server.js`，不包含 Nginx 或完整的开发依赖。构建与运行使用相同的 Alpine 基础镜像，保持原生依赖的 libc 一致。
+`npm run setup` 会生成管理密钥并写入 `.env`，保留已有配置。
 
-Compose 示例见 [compose.yaml](compose.yaml)，包含首页 HTTP 健康检查、重启策略、只读根文件系统、日志轮转和 256 MiB 运行内存上限。`/tmp` 和 Next.js 缓存目录使用可写 tmpfs；构建内存不受该运行上限控制。`npm run build` 会自动补齐 standalone 的静态资源，`npm start` 直接启动同一产物，无需 `next start`。
-
-`home-data` 命名卷挂载到 `/app/data`，SQLite 数据库位于 `/app/data/home.sqlite`（通过 `DATABASE_PATH` 设置），非 root 用户可写。`docker compose down` 保留数据卷，`down -v` 会删除数据。SQLite 数据文件及 WAL/SHM 应放在此目录，避免写入镜像或临时目录；使用宿主机目录挂载时需确保 UID/GID 1000 可写。
-
-standalone 保留 Next.js 服务端能力，已接入 `better-sqlite3` 原生驱动。Docker 构建阶段安装 Python、make 和 g++，在 Alpine 缺少预编译包时编译驱动；运行镜像不包含这些编译工具。接入后的内存占用应重新测量，256 MiB 为当前运行上限，并非实测保证。
-
-内存优化依据、实测结果和复现步骤见 [运行时内存分析](docs/MEMORY.md)。
-
-```bash
-npm run lint
-npm run typecheck
-npm run build
-```
-
-- `app/tokens.css`：本地颜色、字体、尺寸、间距、圆角、阴影变量。
-- `app/globals.css`：响应式布局与组件样式。
-- `components/home.tsx`：主页组件及交互。
-- `lib/site.ts`：数据库首次初始化的种子数据。
-- `lib/server/database.ts`：SQLite 连接、版本迁移、事务读写。
-- `lib/server/home-content.ts`：首页数据缓存与保存后失效。
-- `docs/DESIGN-SUMMARY.md`：设计摘要、模板差异与交互说明。
-- `docs/DESIGN.md`、`docs/stitch_minimalist_personal_homepage/`：原始设计参考。
-
-时间使用访问者的本地时区；地点可在后台「站点信息」中填写；天气和湿度来自和风天气，运行率为模板静态示例。服务链接使用模板或公共站点示例，品牌与备案信息也沿用模板，发布前请替换为自己的配置。氛围音为点击后播放的本地合成和弦。
-
-页脚 Copyright 同行、作者名后的版本号由 `app/page.tsx` 从 `package.json` 读取，随构建产物写入页面。只需修改 `package.json` 的 `version` 并重新构建；线上运行时不再读取版本文件。
-
-
-## SQLite 数据存储
-
-使用 `better-sqlite3`，无需单独的数据库服务。首次首页请求会自动创建数据库、建表，并在同一事务内导入 `lib/site.ts` 的现有内容。构建阶段不访问数据库；已有数据库不会被种子数据覆盖，即使服务或寄语列表被清空也不会重新导入。
-
-- `site_settings`：固定 `id = 1` 的站点设置，包含名称、域名后缀、签名、邮箱、备案信息、公安备案信息和位置设置。公安备案在后台与备案信息并列填写，首页页脚并列显示并链接至公安备案查询；留空时隐藏。默认图标位于 `public/images/ga_icon.png`。
-- `services`：服务链接，包含图标、分类、颜色、排序和启用状态。
-- `quotes`：寄语及作者，包含排序和启用状态。
-
-各表含 `updated_at`，保存时刷新；通过 `PRAGMA user_version` 管理结构版本。单个 Node.js 进程复用一个连接，启用 WAL、5 秒锁等待，页面缓存目标为 2 MiB。
-
-`npm run dev` 和在仓库根目录执行的 `npm start` 默认使用 `data/home.sqlite`。可用绝对路径覆盖：
-
-```bash
-DATABASE_PATH=/absolute/path/home.sqlite npm start
-npm test
-```
-
-首页改为运行时渲染，SQLite 查询结果通过 Next.js Data Cache 跨请求复用；此阶段缓存的是数据，页面仍在每次请求时渲染。`saveHomeContent()` 用事务整体保存站点设置、服务和寄语，提交成功后立即使数据缓存失效，下一次请求加载新内容，无需重新构建。该函数由通过 JWT 身份验证的服务端设置接口调用，管理页面位于 `/settings`，读取及保存接口均验证管理会话。整体保存必须传入包含隐藏项的完整数据，可通过 `readContent(getDatabase())` 读取；首页读取只返回启用项。位置名称（`site.location`）和地区编码（`site.areacode`）可在后台「站点信息」填写并保存到 SQLite，旧数据库自动迁移。位置名称用于首页展示，留空显示「未设置位置」；areacode 按文本保存（保留前导零），支持和风天气 Location ID 或 `经度,纬度`，留空停用天气。其他写在组件内的静态文案和社交链接暂不入库。
-
-直接通过 SQLite 工具修改数据不会触发缓存失效。维护时应停止服务，修改数据库，清除 `.next/standalone/.next/cache`（Docker 中为 `/app/.next/cache`；开发环境为 `.next/cache`）后启动；容器重建会清空缓存 tmpfs 并保留数据卷。备份可在服务停止后复制数据库文件，运行中应使用 SQLite 备份工具，不能只复制主文件而忽略 WAL。此方案面向单实例部署。
-
-
-## 设置页面与登录
-
-访问 `/settings`，输入 `.env` 中的 `ADMIN_KEY` 即可编辑站点信息、服务链接和寄语。支持新增、删除、调整顺序、隐藏，以及保存前还原修改。登录过期后再次输入密钥可继续编辑，当前页面内未保存的修改会保留。
-
-首次运行 `npm run setup` 会生成随机的 16 位 `ADMIN_KEY` 和独立的 `ADMIN_JWT_SECRET`，写入仓库根目录 `.env`，文件权限为 `600`，重复执行不会替换已有非空配置。该文件已被 Git 和 Docker 构建上下文忽略，standalone 打包也会排除本地环境文件。不要使用 `NEXT_PUBLIC_` 前缀保存密钥。
-
-| 环境变量 | 用途 |
+| 环境变量 | 说明 |
 | --- | --- |
-| `ADMIN_KEY` | 16 位登录密钥，允许字母、数字、下划线和短横线 |
-| `ADMIN_JWT_SECRET` | 独立 JWT 签名密钥，至少 32 个字符；setup 自动生成 |
-| `ADMIN_COOKIE_SECURE` | 默认 `true`，仅通过 HTTPS 发送 Cookie；setup 为本地 HTTP 调试生成 `false` |
-| `APP_ORIGIN` | 可选，反向代理部署时填写浏览器访问的完整源，例如 `https://home.example.com`，不带末尾斜杠 |
+| `ADMIN_KEY` | 后台登录密钥，16 位字母、数字、下划线或短横线 |
+| `ADMIN_JWT_SECRET` | 登录会话签名密钥，至少 32 个字符 |
+| `ADMIN_COOKIE_SECURE` | HTTPS 部署设为 `true`，本地 HTTP 调试设为 `false` |
+| `APP_ORIGIN` | 可选，站点完整访问地址，例如 `https://home.example.com` |
+| `DATABASE_PATH` | 可选，SQLite 数据库路径，默认 `data/home.sqlite`，容器内为 `/app/data/home.sqlite` |
 
-`npm run dev` 和 `npm start` 会读取根目录 `.env`（建议 Node.js 22）；Compose 自动将这些变量注入容器。直接使用 `docker run` 时增加 `--env-file .env`。HTTPS 上线前将 `ADMIN_COOKIE_SECURE` 设为 `true`，反向代理需保留 Host，或正确配置 `APP_ORIGIN`。修改密钥后重启 Node.js 服务；Compose 使用 `docker compose up -d --force-recreate` 重新注入环境变量。更换登录密钥或签名密钥都会使旧 JWT 失效。
+修改环境变量后需重启服务；Docker Compose 使用 `docker compose up -d --force-recreate`。未配置管理密钥时，后台登录不可用。
 
-登录成功后，服务端将有效期 12 小时的 HS256 JWT 写入 `HttpOnly`、`SameSite=Strict` Cookie，浏览器脚本无法读取令牌。每次读取管理数据、保存设置都会重新验证签名、过期时间、签发者、受众和管理员身份；写请求另校验 Origin。登录接口单实例全局每分钟最多尝试 10 次。退出会清除当前浏览器 Cookie。管理功能未配置时保持关闭，不影响公开首页。
+### 天气
 
-接口：`POST /api/admin/login`、`POST /api/admin/logout`、`GET /api/admin/settings`、`PUT /api/admin/settings`。保存接口对所有字段进行服务端校验，并以事务整体保存；不会接受任意协议的链接。
+在管理后台「站点信息」中填写位置名称、地区编码，以及和风天气 API Host、开发者 ID、项目 ID、凭据 ID 和 Ed25519 私钥。地区编码支持和风天气 Location ID 或 `经度,纬度`。
 
-验证命令：
+密钥创建方式见[和风天气官方认证文档](https://dev.qweather.com/docs/configuration/authentication/#generate-ed25519-key)。未配置时，首页显示「天气未配置」。
+
+### 数据备份
+
+站点配置保存在 SQLite 中。备份时先停止服务，再复制 `data` 目录或 Docker 数据卷中的文件。若配置了天气服务，备份也包含天气私钥，请妥善保存。
+
+## 自动发布
+
+[GitHub Actions](.github/workflows/docker-publish.yml) 根据推送的 Git tag 构建镜像并发布到 GHCR：
+
+| Git tag | 镜像标签 |
+| --- | --- |
+| `v1.0.0` | `latest`、`v1.0.0` |
+| `dev-1.0.0` | `test` |
+
+版本格式为三段数字。正式版发布示例：
 
 ```bash
-npm test
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+测试版使用 `dev-` 前缀。流程使用内置 `GITHUB_TOKEN`，无需额外配置密钥；首次发布后，将 GHCR 包设为 Public 即可支持匿名拉取。
+
+## 开发
+
+```bash
 npm run lint
 npm run typecheck
+npm test
+```
+
+浏览器测试：
+
+```bash
 npx playwright install chromium
 npm run test:e2e
 ```
 
-浏览器测试使用独立的测试密钥及 `.next/e2e/home.sqlite`，不会修改 `data/home.sqlite`。覆盖登录、Cookie、编辑保存、首页缓存更新、移动布局、过期续登、退出、伪造令牌及跨站请求拒绝。
+## 致谢
 
-服务链接支持从 16 种内置图标中选择，选择后即时预览，保存后显示在首页。数据库版本 2 自动新增 `services.icon`，保留原有服务的图标和内容；自定义服务默认使用链接图标。
-
-
-### 和风天气配置
-
-在后台「站点信息」的地区编码旁填写和风天气 API Host（仅域名）、开发者 ID、项目 ID、凭据 ID 和完整 Ed25519 PEM 私钥。开发者 ID 与 API Host 在和风天气控制台「设置」中查看，项目 ID 和凭据 ID 在「项目管理」中查看。
-
-按[官方认证文档](https://dev.qweather.com/docs/configuration/authentication/#generate-ed25519-key)生成密钥对：
-
-```bash
-openssl genpkey -algorithm ED25519 -out ed25519-private.pem
-openssl pkey -pubout -in ed25519-private.pem -out ed25519-public.pem
-```
-
-将公钥上传到和风天气项目的 JWT 凭据中，将私钥文件的完整内容粘贴到本站后台。保存后输入框清空，仅显示「已配置私钥」；留空保存保留原私钥，填写新值替换，勾选「清除已保存的天气私钥」后保存可删除。管理页面、管理 API 和首页均不返回已保存的私钥。私钥存储在服务端 SQLite 的独立 `weather_settings` 表中，备份也包含私钥，应限制数据库及备份的读取权限。
-
-服务端按官方规则生成 EdDSA JWT（`kid`、`iss`、`sub`、`iat`、`exp`），通过 Bearer 请求[实时天气 v1](https://dev.qweather.com/docs/api/weather/weather-current/)。城市编码先经 GeoAPI 解析为坐标，直接填写 `经度,纬度` 可省去城市查询。首页显示天气、摄氏温度、湿度和来源链接，每 10 分钟刷新；服务端共享缓存 10 分钟并合并并发请求，失败缓存 1 分钟。城市或认证配置修改后，新请求立即使用新配置。未配置时显示「天气未配置」，请求失败时显示「天气暂不可用」。数据库版本 5 自动新增天气表并保留旧数据。
-
-
-后台「站点信息 → 关于小站」支持编辑页面标题（`title`，必填，最多 200 字）和页面描述（`description`，最多 500 字，可留空）。`app/layout.tsx` 在运行时读取配置生成元信息，保存后新请求即生效，无需重新构建。数据库版本 6 自动添加这两个字段，并沿用原有标题及描述作为初始值；已有站点内容不变。
+设计灵感来自 [imsyy/home](https://github.com/imsyy/home)。
