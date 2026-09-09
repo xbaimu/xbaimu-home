@@ -42,6 +42,8 @@ npm start
 services:
   home:
     image: ghcr.io/xbaimu/xbaimu-home:latest
+    # 国内可使用
+    # image: ghcr.1ms.run/xbaimu/xbaimu-home:latest
     ports:
       - "${PORT:-3000}:3000"
     environment:
