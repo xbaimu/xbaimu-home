@@ -36,17 +36,61 @@ npm start
 
 ### 使用发布镜像
 
-准备 `.env` 文件，可通过 `npm run setup` 自动生成，或参考 [.env.example](.env.example) 填写管理密钥。
+需要 Docker 和 Docker Compose v2。在部署目录中新建 `compose.yaml`：
+
+```yaml
+services:
+  home:
+    image: ghcr.io/xbaimu/xbaimu-home:latest
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      ADMIN_KEY: ${ADMIN_KEY:-}
+      ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET:-}
+      ADMIN_COOKIE_SECURE: ${ADMIN_COOKIE_SECURE:-true}
+      APP_ORIGIN: ${APP_ORIGIN:-}
+    volumes:
+      - home-data:/app/data
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+      - /app/.next/cache:size=32m,uid=1000,gid=1000,mode=0700
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 256m
+    pids_limit: 128
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+volumes:
+  home-data:
+```
+
+在同一目录创建 `.env`，填写自己的管理密钥：
+
+```dotenv
+PORT=3000
+ADMIN_KEY=<16位随机登录密钥>
+ADMIN_JWT_SECRET=<至少32位随机签名密钥>
+ADMIN_COOKIE_SECURE=false
+```
+
+可分别使用 `openssl rand -hex 8` 和 `openssl rand -hex 32` 生成两项密钥。通过 HTTPS 部署时，将 `ADMIN_COOKIE_SECURE` 改为 `true`，并设置 `APP_ORIGIN=https://你的域名`。
+
+启动服务：
 
 ```bash
-docker run -d \
-  --name xbaimu-home \
-  --restart unless-stopped \
-  -p 3000:3000 \
-  --env-file .env \
-  -v xbaimu-home-data:/app/data \
-  ghcr.io/jayxguan/xbaimu-home:latest
+docker compose pull
+docker compose up -d
 ```
+
+访问 `http://服务器地址:3000`，在 `/settings` 使用 `ADMIN_KEY` 登录。更新镜像时，重新执行以上两条命令；站点数据保存在 `home-data` 数据卷中。
 
 镜像支持 `linux/amd64`，可选择以下标签：
 
