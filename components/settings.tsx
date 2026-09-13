@@ -529,6 +529,9 @@ export default function Settings({
                         }
                       />
                     </Field>
+                    <Field label="社交链接" wide hint="每行填写名称、链接和图标，使用 | 分隔。">
+                      <textarea rows={6} value={(content.site.socials ?? []).map((s) => `${s.label}|${s.href}|${s.icon}`).join('\n')} onChange={(e) => edit({ ...content, site: { ...content.site, socials: e.target.value.split('\n').filter(Boolean).map((line) => { const [label, href, icon='github'] = line.split('|'); return { label: label?.trim() || '链接', href: href?.trim() || '#', icon }; }) } })} />
+                    </Field>
                     <Field label="备案信息">
                       <input
                         value={content.site.registration}

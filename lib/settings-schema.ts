@@ -48,6 +48,7 @@ export const homeContentSchema = z
         police_registration: shortText(100),
         location: shortText(100),
         areacode: shortText(64),
+        socials: z.array(z.object({ label: shortText(40).min(1), href: z.string().trim().max(2048).min(1), icon: z.enum(['github','bilibili','steam','email','twitter','telegram']) }).strict()).max(12),
       })
       .strict(),
     services: z

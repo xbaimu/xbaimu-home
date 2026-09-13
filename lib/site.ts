@@ -7,10 +7,18 @@ export const site = {
   domain: ".cn",
   tagline: "静水流深 · 沧笙踏歌",
   email: "contact@xbaimu.cn",
-  registration: "豫ICP备xxxxxx号-1",
+  registration: "渝ICP备xxxxxx号-1",
   police_registration: "",
   location: "杭州市 · 西湖区",
   areacode: "",
+  socials: [
+    { label: "GitHub", href: "https://github.com/xbaimu", icon: "github" },
+    { label: "哔哩哔哩", href: "https://www.bilibili.com", icon: "bilibili" },
+    { label: "Steam", href: "https://store.steampowered.com", icon: "steam" },
+    { label: "电子邮件", href: "mailto:contact@xbaimu.cn", icon: "email" },
+    { label: "X / Twitter", href: "https://x.com", icon: "twitter" },
+    { label: "Telegram", href: "https://telegram.org", icon: "telegram" },
+  ],
 };
 export const services = [
   {

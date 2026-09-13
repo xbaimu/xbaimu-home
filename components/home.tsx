@@ -19,6 +19,7 @@ import {
   FaPaperclip,
   FaAngleRight,
   FaHeart,
+  FaLink,
 } from "react-icons/fa6";
 import type { HomeContent, WeatherResult } from "@/lib/site-types";
 import ServiceIcon from "@/components/service-icon";
@@ -28,14 +29,9 @@ const categories = [
   { id: "personal", label: "生活随笔" },
   { id: "tools", label: "实用工具" },
 ];
-const socials = (email: string) => [
-  { label: "GitHub", href: "https://github.com/xbaimu", icon: FaGithub },
-  { label: "哔哩哔哩", href: "https://www.bilibili.com", icon: FaBilibili },
-  { label: "Steam", href: "https://store.steampowered.com", icon: FaSteam },
-  { label: "电子邮件", href: `mailto:${email}`, icon: FaRegEnvelope },
-  { label: "X / Twitter", href: "https://x.com", icon: FaXTwitter },
-  { label: "Telegram", href: "https://telegram.org", icon: FaTelegram },
-];
+const socialIcons = {
+  github: FaGithub, bilibili: FaBilibili, steam: FaSteam, email: FaRegEnvelope, twitter: FaXTwitter, telegram: FaTelegram,
+};
 const pad = (n: number) => String(n).padStart(2, "0");
 
 export default function Home({
@@ -240,7 +236,7 @@ export default function Home({
             </span>
           </article>
           <nav className="social-dock" aria-label="社交媒体">
-            {socials(site.email).map(({ label, href, icon: Icon }) => (
+            {(site.socials ?? []).map(({ label, href, icon }) => { const Icon = socialIcons[icon as keyof typeof socialIcons] || FaLink; return (
               <a
                 key={label}
                 className="paper-card social-link"
@@ -251,8 +247,7 @@ export default function Home({
                 title={label}
               >
                 <Icon />
-              </a>
-            ))}
+              </a>); })}
           </nav>
         </section>
 

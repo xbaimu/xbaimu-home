@@ -11,7 +11,9 @@ export interface SiteSettings {
   police_registration: string;
   location: string;
   areacode: string;
+  socials: Social[];
 }
+export interface Social { label: string; href: string; icon: string; }
 
 export interface Service {
   id: string;

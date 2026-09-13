@@ -3,10 +3,11 @@ import Database from 'better-sqlite3';
 import { mkdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { site, services, quotes } from '../site';
+const siteDefaults = site;
 import type { AdminContent, HomeContent, Quote, Service, SiteSettings, WeatherSettings } from '../site-types';
 import { validateWeatherSettings } from './weather-auth';
 
-const schemaVersion = 6;
+const schemaVersion = 7;
 
 // 懒初始化：构建不打开数据库。全局连接也可跨开发环境热更新复用。
 const globalDatabase = globalThis as typeof globalThis & {
@@ -55,6 +56,7 @@ export function openDatabase(path: string): Database.Database {
             police_registration TEXT NOT NULL DEFAULT '',
             location TEXT NOT NULL DEFAULT '',
             areacode TEXT NOT NULL DEFAULT '',
+            socials TEXT NOT NULL DEFAULT '[]',
             updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
           );
           CREATE TABLE services (
@@ -109,6 +111,7 @@ export function openDatabase(path: string): Database.Database {
         db.prepare('UPDATE site_settings SET title = ?, description = ? WHERE id = 1')
           .run(site.title, site.description);
       }
+      if (version >= 1 && version <= 6) db.exec("ALTER TABLE site_settings ADD COLUMN socials TEXT NOT NULL DEFAULT '[]'; UPDATE site_settings SET socials = '" + JSON.stringify(site.socials).replace(/'/g, "''") + "' WHERE id = 1 AND (socials = '[]' OR socials = '');");
       db.pragma(`user_version = ${schemaVersion}`);
     }).immediate();
     return db;
@@ -134,9 +137,15 @@ type QuoteRow = Omit<Quote, 'enabled'> & { enabled: number };
 
 export function readContent(db: Database.Database, publicOnly = false): HomeContent {
   return db.transaction(() => {
-    const site = db.prepare(`SELECT title, description, name, domain, tagline, email, registration, police_registration, location, areacode
+    const site = db.prepare(`SELECT title, description, name, domain, tagline, email, registration, police_registration, location, areacode, socials
       FROM site_settings WHERE id = 1`).get() as SiteSettings | undefined;
     if (!site) throw new Error('缺少站点设置');
+    try {
+      site.socials = JSON.parse((site.socials as unknown as string) || '[]');
+      if (!Array.isArray(site.socials) || site.socials.length === 0) site.socials = [...siteDefaults.socials];
+    } catch {
+      site.socials = site.socials ?? [];
+    }
     const filter = publicOnly ? 'WHERE enabled = 1' : '';
     const services = db.prepare(`SELECT id, title, description, href, icon, color, category,
       sort_order, enabled FROM services ${filter} ORDER BY sort_order, id`).all() as ServiceRow[];
@@ -164,12 +173,12 @@ export function writeContent(db: Database.Database, content: HomeContent & { wea
       db.prepare(`UPDATE weather_settings SET apiHost = @apiHost, projectId = @projectId, developerId = @developerId,
         credentialId = @credentialId, privateKey = @privateKey WHERE id = 1`).run(weather);
     }
-    db.prepare(`INSERT INTO site_settings (id, title, description, name, domain, tagline, email, registration, police_registration, location, areacode)
-      VALUES (1, @title, @description, @name, @domain, @tagline, @email, @registration, @police_registration, @location, @areacode)
+    db.prepare(`INSERT INTO site_settings (id, title, description, name, domain, tagline, email, registration, police_registration, location, areacode, socials)
+      VALUES (1, @title, @description, @name, @domain, @tagline, @email, @registration, @police_registration, @location, @areacode, @socials)
       ON CONFLICT(id) DO UPDATE SET title = excluded.title, description = excluded.description, name = excluded.name, domain = excluded.domain,
       tagline = excluded.tagline, email = excluded.email,
       registration = excluded.registration, police_registration = excluded.police_registration, location = excluded.location,
-      areacode = excluded.areacode, updated_at = CURRENT_TIMESTAMP`).run(content.site);
+      areacode = excluded.areacode, socials = excluded.socials, updated_at = CURRENT_TIMESTAMP`).run({ ...content.site, socials: JSON.stringify(content.site.socials) });
     db.exec('DELETE FROM services; DELETE FROM quotes;');
     const insertService = db.prepare(`INSERT INTO services
       (id, title, description, href, icon, color, category, sort_order, enabled)
