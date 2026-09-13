@@ -3,6 +3,8 @@
 纸本风格的个人主页，基于 Next.js、React 和 TypeScript 构建，支持在线管理站点内容和 Docker 部署。
 灵感来源：[imsyy/home](https://github.com/imsyy/home)。
 
+![demo](https://github.com/xbaimu/xbaimu-home/raw/main/demo.png "demo")
+
 ## 功能
 
 - 响应式布局，适配桌面和移动设备。
